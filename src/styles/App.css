@@ -1,0 +1,12 @@
+.idle-char {
+  color: #a0aec0; /* Gray: Not yet typed */
+}
+
+.correct-char {
+  color: #48bb78; /* Green: Perfect match */
+}
+
+.incorrect-char {
+  color: #f56565; /* Red: Wrong letter typed */
+  background-color: #fed7d7; /* Optional soft red background highlight */
+}
