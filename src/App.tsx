@@ -48,22 +48,60 @@ const calculatetimeTick = (time: number): string => {
   return `${minute.padStart(2, "0")}:${second.padStart(2, "0")}`;
 };
 
+const showResults = (results: boolean[], time: number): string => {
+  const correctChars = results.filter(Boolean).length;
+
+  const accuracy = (correctChars / results.length) * 100;
+  const raw = results.length / 5 / (time / 60);
+  const wpm = correctChars / 5 / (time / 60);
+
+  return `Accuracy:  ${accuracy.toFixed(1)}% 
+          Raw speed: ${raw.toFixed(1)} 
+          WPM:       ${Math.floor(wpm)}`;
+};
+
+const calculateResults = (
+  currentText: string[],
+  typedText: string[],
+  time: number,
+): string => {
+  const results: boolean[] = typedText.map<boolean>(
+    (character, index) => character === currentText[index],
+  );
+  console.log(results);
+  console.log(results.length);
+  return showResults(results, time);
+};
+
 function App() {
   type TestStatus = "idle" | "running" | "finished";
   type TestMode = "classic" | "race" | "story" | "chat";
 
   const logo = "/favicon.svg";
-  const [time, setTime] = useState(20);
+  const testTime: number = 30;
+  const [time, setTime] = useState(testTime);
   const [testStatus, setTestStatus] = useState<TestStatus>("idle");
-  const [testMode, setTestMode] = useState<TestMode>("classic");
+  const [testMode] = useState<TestMode>("classic");
   const [typedText, setTypedText] = useState<string>("");
   const [currentText, setCurrentText] = useState<string>(
     texGeneration(commonWords),
   );
-
   const splittedCurrentText: string[] = currentText.split("");
   const splittedTypedText: string[] = typedText.split("");
+  const [results, setResults] = useState<string>("");
 
+  const handleTestReset = () => {
+    setTestStatus("idle");
+    setTypedText("");
+    setTime(testTime);
+  };
+
+  const handleTestNext = () => {
+    setTestStatus("idle");
+    setTypedText("");
+    setTime(testTime);
+    setCurrentText(texGeneration(commonWords));
+  };
   useEffect(() => {
     const handlekeydown = (event: KeyboardEvent) => {
       if (testStatus === "finished") return;
@@ -87,9 +125,13 @@ function App() {
   useEffect(() => {
     if (testStatus !== "running") return;
 
+    setResults("");
     const interval = setInterval(() => {
       if (testMode === "classic") {
-        setTime((time) => time - 1);
+        setTime((time) => {
+          if (time <= 0) return 0;
+          return time - 1;
+        });
       }
     }, 1000);
     return () => {
@@ -98,7 +140,12 @@ function App() {
   }, [testStatus]);
 
   useEffect(() => {
-    if (time <= 0) setTestStatus("finished");
+    if (time === 0) {
+      setTestStatus("finished");
+      setResults(
+        calculateResults(splittedCurrentText, splittedTypedText, testTime),
+      );
+    }
   }, [time]);
 
   return (
@@ -111,6 +158,19 @@ function App() {
         <div id="typing-area">
           {spanSplittedCurrentText(splittedCurrentText, splittedTypedText)}
         </div>
+        <button
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={handleTestReset}
+        >
+          reset
+        </button>
+        <button
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={handleTestNext}
+        >
+          next
+        </button>
+        <div>{results}</div>
       </main>
     </>
   );
