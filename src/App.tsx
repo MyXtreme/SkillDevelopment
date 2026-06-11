@@ -9,7 +9,7 @@ function texGeneration(source: string[] = commonWords): string {
   const min: number = 0;
   const max: number = dataset.length;
   let text: string = "";
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 20; i++) {
     index = Math.floor(Math.random() * (max - min)) + min;
     text += dataset[index] + " ";
   }
@@ -29,9 +29,11 @@ const getCharClassName = (
 };
 
 const spanSplittedCurrentText = (
-  splittedCurrentText: string[],
-  splittedTypedText: string[],
+  currentText: string,
+  typedText: string,
 ): React.JSX.Element[] => {
+  const splittedCurrentText: string[] = currentText.split("");
+  const splittedTypedText: string[] = typedText.split("");
   return splittedCurrentText.map((character, index) => (
     <span
       key={`${character}-${index}`}
@@ -61,15 +63,15 @@ const showResults = (results: boolean[], time: number): string => {
 };
 
 const calculateResults = (
-  currentText: string[],
-  typedText: string[],
+  currentText: string,
+  typedText: string,
   time: number,
 ): string => {
-  const results: boolean[] = typedText.map<boolean>(
-    (character, index) => character === currentText[index],
+  const splittedCurrentText: string[] = currentText.split("");
+  const splittedTypedText: string[] = typedText.split("");
+  const results: boolean[] = splittedTypedText.map<boolean>(
+    (character, index) => character === splittedCurrentText[index],
   );
-  console.log(results);
-  console.log(results.length);
   return showResults(results, time);
 };
 
@@ -78,7 +80,7 @@ function App() {
   type TestMode = "classic" | "race" | "story" | "chat";
 
   const logo = "/favicon.svg";
-  const testTime: number = 30;
+  const testTime: number = 60;
   const [time, setTime] = useState(testTime);
   const [testStatus, setTestStatus] = useState<TestStatus>("idle");
   const [testMode] = useState<TestMode>("classic");
@@ -86,8 +88,6 @@ function App() {
   const [currentText, setCurrentText] = useState<string>(
     texGeneration(commonWords),
   );
-  const splittedCurrentText: string[] = currentText.split("");
-  const splittedTypedText: string[] = typedText.split("");
   const [results, setResults] = useState<string>("");
 
   const handleTestReset = () => {
@@ -107,6 +107,7 @@ function App() {
       if (testStatus === "finished") return;
       setTestStatus("running");
       event.preventDefault();
+
       if (event.key === "Backspace") {
         setTypedText((typedText) => typedText.slice(0, -1));
       } else if (event.key === "Space") {
@@ -121,6 +122,11 @@ function App() {
       window.removeEventListener("keydown", handlekeydown);
     };
   }, [testStatus]);
+
+  useEffect(() => {
+    if (currentText.length * 0.7 <= typedText.length)
+      setCurrentText((currentText) => currentText + texGeneration(commonWords));
+  }, [typedText, currentText]);
 
   useEffect(() => {
     if (testStatus !== "running") return;
@@ -142,9 +148,7 @@ function App() {
   useEffect(() => {
     if (time === 0) {
       setTestStatus("finished");
-      setResults(
-        calculateResults(splittedCurrentText, splittedTypedText, testTime),
-      );
+      setResults(calculateResults(currentText, typedText, testTime));
     }
   }, [time]);
 
@@ -156,7 +160,7 @@ function App() {
       <main>
         <div id="timer">{calculatetimeTick(time)}</div>
         <div id="typing-area">
-          {spanSplittedCurrentText(splittedCurrentText, splittedTypedText)}
+          {spanSplittedCurrentText(currentText, typedText)}
         </div>
         <button
           onMouseDown={(e) => e.preventDefault()}
