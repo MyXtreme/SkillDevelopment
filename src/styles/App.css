@@ -1,12 +1,64 @@
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+
+  /*border: 2px solid blue; /*remove it later*/
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1rem;
+  gap: 5rem;
+  min-height: 100%;
+
+  /*border: 2px solid green; /*remove it later*/
+}
+
+.info-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+
+  /*border: 2px solid red; /*remove it later*/
+}
+
+.typing-area {
+  padding: 1rem;
+  width: 100%;
+  height: 70%;
+  font-size: 3rem;
+
+  /*border: 2px solid red; /*remove it later*/
+}
+.results-area {
+  display: flex;
+  gap: 1rem;
+}
+
+button {
+  width: 10rem;
+}
+
 .idle-char {
-  color: #a0aec0; /* Gray: Not yet typed */
+  color: #a0aec0;
 }
 
 .correct-char {
-  color: #48bb78; /* Green: Perfect match */
+  color: black;
 }
 
 .incorrect-char {
-  color: #f56565; /* Red: Wrong letter typed */
-  background-color: #fed7d7; /* Optional soft red background highlight */
+  color: red;
+  background-color: #fed7d7;
 }
