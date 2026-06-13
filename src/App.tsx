@@ -80,7 +80,7 @@ function App() {
   type TestMode = "classic" | "race" | "story" | "chat";
 
   const logo = "/favicon.svg";
-  const testTime: number = 60;
+  const testTime: number = 20;
   const [time, setTime] = useState(testTime);
   const [testStatus, setTestStatus] = useState<TestStatus>("idle");
   const [testMode] = useState<TestMode>("classic");
@@ -153,30 +153,35 @@ function App() {
   }, [time]);
 
   return (
-    <>
+    <div id="app">
       <header>
-        <img src={logo} alt="logo"></img>
+        <img src={logo} alt="logo" />
+        <h1>MyXtype</h1>
       </header>
       <main>
-        <div id="timer">{calculatetimeTick(time)}</div>
-        <div id="typing-area">
+        <div className="info-area">{calculatetimeTick(time)}</div>
+        <div className="typing-area">
           {spanSplittedCurrentText(currentText, typedText)}
         </div>
-        <button
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={handleTestReset}
-        >
-          reset
-        </button>
-        <button
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={handleTestNext}
-        >
-          next
-        </button>
-        <div>{results}</div>
+        <div className="results-area">
+          <div className="results-area">
+            <button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleTestReset}
+            >
+              reset
+            </button>
+            <button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleTestNext}
+            >
+              next
+            </button>
+          </div>
+          <div>{results}</div>
+        </div>
       </main>
-    </>
+    </div>
   );
 }
 
