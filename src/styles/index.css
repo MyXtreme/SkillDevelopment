@@ -1,5 +1,15 @@
 :root {
-  font-family: ui-monospace, monospace;
+  font-family: "Geist Mono", "IBM Plex Mono", "Roboto Mono", monospace;
+  --surface: #fdf0d5;
+  --background: #fefae0;
+
+  --incorrect-bg: #fed7d7;
+  --incorrect: #e63946;
+  --correct: #31572c;
+
+  --text-idle: #495057;
+  --text-secondary: #212529;
+  --text-primary: #001219;
 }
 
 *,

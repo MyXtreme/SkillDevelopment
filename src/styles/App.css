@@ -2,6 +2,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--background);
 }
 
 header {
@@ -9,8 +10,6 @@ header {
   justify-content: center;
   align-items: center;
   padding: 2rem;
-
-  /*border: 2px solid blue; /*remove it later*/
 }
 
 main {
@@ -18,19 +17,18 @@ main {
   flex-direction: column;
   flex: 1;
   padding: 1rem;
-  gap: 5rem;
+  gap: 3.5rem;
   min-height: 100%;
-
-  /*border: 2px solid green; /*remove it later*/
 }
 
 .info-area {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 3rem;
+  font-size: 4rem;
 
-  /*border: 2px solid red; /*remove it later*/
+  border-radius: 12px;
+  background-color: var(--surface);
 }
 
 .typing-area {
@@ -39,7 +37,8 @@ main {
   height: 70%;
   font-size: 3rem;
 
-  /*border: 2px solid red; /*remove it later*/
+  border-radius: 12px;
+  background-color: var(--surface);
 }
 .results-area {
   display: flex;
@@ -51,14 +50,14 @@ button {
 }
 
 .idle-char {
-  color: #a0aec0;
+  color: var(--text-idle);
 }
 
 .correct-char {
-  color: black;
+  color: var(--text-primary);
 }
 
 .incorrect-char {
-  color: red;
-  background-color: #fed7d7;
+  color: var(--incorrect);
+  background-color: var(--incorrect-bg);
 }
