@@ -34,14 +34,28 @@ const spanSplittedCurrentText = (
 ): React.JSX.Element[] => {
   const splittedCurrentText: string[] = currentText.split("");
   const splittedTypedText: string[] = typedText.split("");
-  return splittedCurrentText.map((character, index) => (
-    <span
-      key={`${character}-${index}`}
-      className={getCharClassName(index, character, splittedTypedText)}
-    >
-      {character}
-    </span>
-  ));
+  return splittedCurrentText.map((character, index) =>
+    index === typedText.length ? (
+      <>
+        <span key={`caret-${index}`} id="caret">
+          |
+        </span>
+        <span
+          key={`${character}-${index}`}
+          className={getCharClassName(index, character, splittedTypedText)}
+        >
+          {character}
+        </span>
+      </>
+    ) : (
+      <span
+        key={`${character}-${index}`}
+        className={getCharClassName(index, character, splittedTypedText)}
+      >
+        {character}
+      </span>
+    ),
+  );
 };
 
 const calculatetimeTick = (time: number): string => {
