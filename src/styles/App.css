@@ -61,3 +61,21 @@ button {
   color: var(--incorrect);
   background-color: var(--incorrect-bg);
 }
+
+.caret {
+  font-family: Arial, Helvetica, sans-serif;
+  animation: caret-blink 1s ease-out infinite;
+}
+
+@keyframes caret-blink {
+  from {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
