@@ -79,6 +79,20 @@ h6 {
   text-wrap: balance;
 }
 
+.clean-input {
+  all: unset;
+  box-sizing: border-box;
+}
+.clean-input::-webkit-outer-spin-button,
+.clean-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.clean-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 /*
   10. Create a root stacking context
 */
