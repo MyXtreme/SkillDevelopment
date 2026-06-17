@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import commonWords from "./data/commonWordsEng.ts";
 import "./styles/App.css";
 
-function texGeneration(source: string[] = commonWords): string {
+function texGeneration(source: string[] = commonWords, wordRange = 40): string {
   const dataset: string[] = source;
 
   let index: number;
   const min: number = 0;
   const max: number = dataset.length;
   let text: string = "";
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < wordRange; i++) {
     index = Math.floor(Math.random() * (max - min)) + min;
     text += dataset[index] + " ";
   }
@@ -36,17 +36,15 @@ const spanSplittedCurrentText = (
   const splittedTypedText: string[] = typedText.split("");
   return splittedCurrentText.map((character, index) =>
     index === typedText.length ? (
-      <>
-        <span key={`caret-${index}`} id="caret">
-          |
-        </span>
+      <Fragment key={`caret-${index}`}>
+        <span id="caret">|</span>
         <span
           key={`${character}-${index}`}
           className={getCharClassName(index, character, splittedTypedText)}
         >
           {character}
         </span>
-      </>
+      </Fragment>
     ) : (
       <span
         key={`${character}-${index}`}
@@ -94,12 +92,14 @@ function App() {
   type TestMode = "classic" | "race" | "story" | "chat";
 
   const logo = "/favicon.svg";
-  const testTime: number = 20;
+  const [testTime, setTestTime] = useState<number>(30);
+  const [customTime, setCustomTime] = useState<number>(120);
   const [time, setTime] = useState(testTime);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [testStatus, setTestStatus] = useState<TestStatus>("idle");
   const [testMode] = useState<TestMode>("classic");
   const [typedText, setTypedText] = useState<string>("");
-  const [currentText, setCurrentText] = useState<string>(
+  const [currentText, setCurrentText] = useState<string>(() =>
     texGeneration(commonWords),
   );
   const [results, setResults] = useState<string>("");
@@ -116,9 +116,12 @@ function App() {
     setTime(testTime);
     setCurrentText(texGeneration(commonWords));
   };
+
   useEffect(() => {
     const handlekeydown = (event: KeyboardEvent) => {
-      if (testStatus === "finished") return;
+      if (event.target instanceof HTMLInputElement) return;
+      if (testStatus === "finished" && time <= 0) return;
+
       setTestStatus("running");
       event.preventDefault();
 
@@ -138,8 +141,9 @@ function App() {
   }, [testStatus]);
 
   useEffect(() => {
-    if (currentText.length * 0.7 <= typedText.length)
+    if (currentText.length * 0.7 <= typedText.length) {
       setCurrentText((currentText) => currentText + texGeneration(commonWords));
+    }
   }, [typedText, currentText]);
 
   useEffect(() => {
@@ -166,6 +170,13 @@ function App() {
     }
   }, [time]);
 
+  console.log("RENDER", {
+    testStatus,
+    isEditing,
+    time,
+    typedLength: typedText.length,
+  });
+
   return (
     <div id="app">
       <header>
@@ -173,7 +184,68 @@ function App() {
         <h1>MyXtype</h1>
       </header>
       <main>
-        <div className="info-area">{calculatetimeTick(time)}</div>
+        {isEditing && testStatus !== "running" ? (
+          <div className="timer-menu">
+            <div
+              onClick={() => {
+                const newTime = 15;
+                setTestTime(newTime);
+                setIsEditing(false);
+                setTime(newTime);
+              }}
+            >
+              15s
+            </div>
+            <div
+              onClick={() => {
+                const newTime = 30;
+                setTestTime(newTime);
+                setIsEditing(false);
+                setTime(newTime);
+              }}
+            >
+              30s
+            </div>
+            <div
+              onClick={() => {
+                const newTime = 60;
+                setTestTime(newTime);
+                setIsEditing(false);
+                setTime(newTime);
+              }}
+            >
+              60s
+            </div>
+            <input
+              id="timer-input"
+              className="clear-input"
+              type="number"
+              value={customTime}
+              onChange={(e) => {
+                setCustomTime(Number(e.target.value));
+              }}
+              onBlur={() => {
+                setTestTime(customTime);
+                setTime(customTime);
+                setIsEditing(false);
+              }}
+            />
+          </div>
+        ) : (
+          <div
+            className="info-area"
+            onClick={() => {
+              if (testStatus === "running") {
+                setIsEditing(false);
+                return;
+              }
+              setIsEditing(true);
+            }}
+          >
+            {calculatetimeTick(time)}
+          </div>
+        )}
+
         <div className="typing-area">
           {spanSplittedCurrentText(currentText, typedText)}
         </div>

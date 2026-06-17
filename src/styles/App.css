@@ -23,12 +23,53 @@ main {
 
 .info-area {
   display: flex;
+  flex: 1;
   justify-content: center;
   align-items: center;
   font-size: 4rem;
+  min-height: 5rem;
+  cursor: pointer;
 
   border-radius: 12px;
   background-color: var(--surface);
+}
+
+.timer-menu {
+  display: flex;
+  flex: 1;
+
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  gap: 2rem;
+  min-height: 5rem;
+
+  border-radius: 12px;
+  background-color: var(--surface);
+}
+
+.timer-menu > div {
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.timer-menu > div:hover,
+#timer-input:hover,
+.info-area:hover {
+  background-color: #fbe1a9;
+}
+
+#timer-input {
+  width: 6rem;
+  height: 2rem;
+
+  border: none;
+  border-radius: 0.5rem;
+
+  background: var(--surface);
+  color: var(--text-primary);
+
+  text-align: center;
 }
 
 .typing-area {
