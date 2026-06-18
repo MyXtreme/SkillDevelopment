@@ -220,10 +220,10 @@ function App() {
               id="timer-input"
               className="clear-input"
               type="number"
+              min={1}
+              max={1800}
               value={customTime}
-              onChange={(e) => {
-                setCustomTime(Number(e.target.value));
-              }}
+              onChange={(e) => setCustomTime(Number(e.target.value))}
               onBlur={() => {
                 setTestTime(customTime);
                 setTime(customTime);
