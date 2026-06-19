@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--background);
+  background-color: var(--color-bg);
 }
 
 header {
@@ -17,7 +17,7 @@ main {
   flex-direction: column;
   flex: 1;
   padding: 1rem;
-  gap: 3.5rem;
+  gap: 1rem;
   min-height: 100%;
 }
 
@@ -31,7 +31,7 @@ main {
   cursor: pointer;
 
   border-radius: 12px;
-  background-color: var(--surface);
+  background-color: var(--color-bg);
 }
 
 .timer-menu {
@@ -45,7 +45,7 @@ main {
   min-height: 5rem;
 
   border-radius: 12px;
-  background-color: var(--surface);
+  background-color: var(--color-bg);
 }
 
 .timer-menu > div {
@@ -66,8 +66,8 @@ main {
   border: none;
   border-radius: 0.5rem;
 
-  background: var(--surface);
-  color: var(--text-primary);
+  background: var(--color-bg);
+  color: var(--color-text);
 
   text-align: center;
 }
@@ -79,7 +79,7 @@ main {
   font-size: 3rem;
 
   border-radius: 12px;
-  background-color: var(--surface);
+  background-color: var(--color-bg);
 }
 .results-area {
   display: flex;
@@ -91,7 +91,8 @@ button {
 }
 
 .idle-char {
-  color: var(--text-idle);
+  color: var(--color-text);
+  opacity: 80%;
 }
 
 .correct-char {
@@ -100,7 +101,8 @@ button {
 
 .incorrect-char {
   color: var(--incorrect);
-  background-color: var(--incorrect-bg);
+  background-color: rgba(230, 57, 70, 10%);
+  border-radius: 4px;
 }
 
 .caret {
