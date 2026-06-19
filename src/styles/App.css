@@ -99,6 +99,8 @@ main {
 }
 .results-area {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   gap: 1rem;
 }
 
@@ -112,13 +114,18 @@ button {
 }
 
 .correct-char {
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 .incorrect-char {
-  color: var(--incorrect);
+  color: var(--color-accent);
   background-color: rgba(230, 57, 70, 10%);
   border-radius: 4px;
+}
+
+.wpm {
+  font-size: 4rem;
+  color: var(--color-accent);
 }
 
 .caret {

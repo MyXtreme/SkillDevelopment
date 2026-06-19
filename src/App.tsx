@@ -62,23 +62,25 @@ const calculatetimeTick = (time: number): string => {
   return `${minute.padStart(2, "0")}:${second.padStart(2, "0")}`;
 };
 
-const showResults = (results: boolean[], time: number): string => {
+const showResults = (results: boolean[], time: number) => {
   const correctChars = results.filter(Boolean).length;
 
   const accuracy = (correctChars / results.length) * 100;
   const raw = results.length / 5 / (time / 60);
   const wpm = correctChars / 5 / (time / 60);
 
-  return `Accuracy:  ${accuracy.toFixed(1)}% 
-          Raw speed: ${raw.toFixed(1)} 
-          WPM:       ${Math.floor(wpm)}`;
+  return {
+    accuracy: Number(accuracy.toFixed(1)),
+    raw: Number(raw.toFixed(1)),
+    wpm: Number(Math.floor(wpm)),
+  };
 };
 
 const calculateResults = (
   currentText: string,
   typedText: string,
   time: number,
-): string => {
+) => {
   const splittedCurrentText: string[] = currentText.split("");
   const splittedTypedText: string[] = typedText.split("");
   const results: boolean[] = splittedTypedText.map<boolean>(
@@ -91,6 +93,12 @@ function App() {
   type TestStatus = "idle" | "running" | "finished";
   type TestMode = "classic" | "race" | "story" | "chat";
 
+  const result = {
+    accuracy: 0,
+    raw: 0,
+    wpm: 0,
+  };
+
   const logo = "/favicon.svg";
   const [testTime, setTestTime] = useState<number>(30);
   const [customTime, setCustomTime] = useState<number>(120);
@@ -102,7 +110,7 @@ function App() {
   const [currentText, setCurrentText] = useState<string>(() =>
     texGeneration(commonWords),
   );
-  const [results, setResults] = useState<string>("");
+  const [results, setResults] = useState(result);
 
   const handleTestReset = () => {
     setTestStatus("idle");
@@ -149,7 +157,7 @@ function App() {
   useEffect(() => {
     if (testStatus !== "running") return;
 
-    setResults("");
+    setResults({ accuracy: 0, raw: 0, wpm: 0 });
     const interval = setInterval(() => {
       if (testMode === "classic") {
         setTime((time) => {
@@ -247,26 +255,32 @@ function App() {
         )}
       </header>
       <main>
-        <div className="typing-area">
-          {spanSplittedCurrentText(currentText, typedText)}
-        </div>
-        <div className="results-area">
-          <div className="results-area">
-            <button
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={handleTestReset}
-            >
-              reset
-            </button>
-            <button
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={handleTestNext}
-            >
-              next
-            </button>
+        {(testStatus === "running" || testStatus === "idle") && (
+          <div className="typing-area">
+            {spanSplittedCurrentText(currentText, typedText)}
           </div>
-          <div>{results}</div>
-        </div>
+        )}
+        {testStatus === "finished" && (
+          <div className="results-area">
+            <div className="wpm">WPM: {results.wpm}</div>
+            <div className="metrics">Accuracy: {results.accuracy}%</div>
+            <div className="metrics">Raw speed: {results.raw}</div>
+            <div className="action-buttons">
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleTestReset}
+              >
+                reset
+              </button>
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleTestNext}
+              >
+                next
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
