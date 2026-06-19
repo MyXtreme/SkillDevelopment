@@ -179,11 +179,11 @@ function App() {
 
   return (
     <div id="app">
-      <header>
+      <nav>
         <img src={logo} alt="logo" />
         <h1>MyXtype</h1>
-      </header>
-      <main>
+      </nav>
+      <header>
         {isEditing && testStatus !== "running" ? (
           <div className="timer-menu">
             <div
@@ -245,7 +245,8 @@ function App() {
             {calculatetimeTick(time)}
           </div>
         )}
-
+      </header>
+      <main>
         <div className="typing-area">
           {spanSplittedCurrentText(currentText, typedText)}
         </div>
