@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment, use } from "react";
 import commonWords from "./data/commonWordsEng.ts";
 import "./styles/App.css";
 
@@ -39,6 +39,7 @@ const spanSplittedCurrentText = (
       <Fragment key={`caret-${index}`}>
         <span id="caret">|</span>
         <span
+          id={`${character}-${index}`}
           key={`${character}-${index}`}
           className={getCharClassName(index, character, splittedTypedText)}
         >
@@ -47,6 +48,7 @@ const spanSplittedCurrentText = (
       </Fragment>
     ) : (
       <span
+        id={`${character}-${index}`}
         key={`${character}-${index}`}
         className={getCharClassName(index, character, splittedTypedText)}
       >
@@ -110,6 +112,7 @@ function App() {
   const [currentText, setCurrentText] = useState<string>(() =>
     texGeneration(commonWords),
   );
+  const [scrollOffset, setScrollOffset] = useState(0);
   const [results, setResults] = useState(result);
 
   const handleTestReset = () => {
@@ -133,13 +136,16 @@ function App() {
       setTestStatus("running");
       event.preventDefault();
 
+      if (event.key === "Tab") {
+        handleTestNext();
+      }
       if (event.key === "Backspace") {
         setTypedText((typedText) => typedText.slice(0, -1));
       } else if (event.key === "Space") {
         setTypedText((typedText) => typedText + event.key);
       } else if (event.key.length === 1) {
         setTypedText((typedText) => typedText + event.key);
-      }
+      } else return;
     };
 
     window.addEventListener("keydown", handlekeydown);
@@ -177,6 +183,45 @@ function App() {
       setResults(calculateResults(currentText, typedText, testTime));
     }
   }, [time]);
+
+  useEffect(() => {
+    if (typedText.length === 0) {
+      setScrollOffset(0);
+    }
+    const currentCharIndex = typedText.length;
+    if (currentCharIndex === 0) return;
+
+    const getSpanAtIndex = (index: number) => {
+      return document.getElementById(`${currentText[index]}-${index}`);
+    };
+    const currentCharSpan = getSpanAtIndex(currentCharIndex);
+    const firstCharSpan = getSpanAtIndex(0);
+
+    if (!currentCharSpan || !firstCharSpan) return;
+
+    const lineTopHeight: number = firstCharSpan.offsetTop;
+    const lineBetweenHeight = parseInt(
+      window.getComputedStyle(currentCharSpan).lineHeight,
+      10,
+    );
+    const getCurrentLineIndex = (currentCharIndex: number): number => {
+      const currentCharSpan = getSpanAtIndex(currentCharIndex);
+      if (!currentCharSpan) {
+        console.log("not found such element at index: " + currentCharIndex);
+        return -1;
+      }
+      return (currentCharSpan.offsetTop - lineTopHeight) / lineBetweenHeight;
+    };
+
+    const currentLineIndex = getCurrentLineIndex(currentCharIndex);
+    const isLineChanged =
+      currentLineIndex !== getCurrentLineIndex(currentCharIndex - 1);
+
+    if (currentLineIndex === -1 || currentLineIndex === 1) return;
+    if (isLineChanged) {
+      setScrollOffset(Math.max(0, (currentLineIndex - 1) * lineBetweenHeight));
+    }
+  }, [typedText]);
 
   console.log("RENDER", {
     testStatus,
@@ -257,7 +302,12 @@ function App() {
       <main>
         {(testStatus === "running" || testStatus === "idle") && (
           <div className="typing-area">
-            {spanSplittedCurrentText(currentText, typedText)}
+            <div
+              className="typing-content"
+              style={{ transform: `translateY(-${scrollOffset}px)` }}
+            >
+              {spanSplittedCurrentText(currentText, typedText)}
+            </div>
           </div>
         )}
         {testStatus === "finished" && (
