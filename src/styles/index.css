@@ -1,5 +1,9 @@
 :root {
   font-family: "Geist Mono", "IBM Plex Mono", "Roboto Mono", monospace;
+
+  --test-font-size: 4rem;
+  --test-line-height: 6rem;
+  --visible-lines: 3;
   /*Iron gall ink theme*/
   --color-bg: #e0c9a6;
   --color-text: #3e353b;
