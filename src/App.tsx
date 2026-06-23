@@ -101,7 +101,7 @@ function App() {
     wpm: 0,
   };
 
-  const logo = "/favicon.svg";
+  //const logo = "";
   const [testTime, setTestTime] = useState<number>(30);
   const [customTime, setCustomTime] = useState<number>(120);
   const [time, setTime] = useState(testTime);
@@ -232,11 +232,11 @@ function App() {
 
   return (
     <div id="app">
-      <nav>
-        <img src={logo} alt="logo" />
+      <nav className="navigation">
+        {/*<img src={logo} alt="logo" />*/}
         <h1>MyXtype</h1>
       </nav>
-      <header>
+      <header className="controls">
         {isEditing && testStatus !== "running" ? (
           <div className="timer-menu">
             <div
@@ -299,7 +299,7 @@ function App() {
           </div>
         )}
       </header>
-      <main>
+      <main className="content">
         {(testStatus === "running" || testStatus === "idle") && (
           <div className="typing-area">
             <div

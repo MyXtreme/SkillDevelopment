@@ -5,28 +5,31 @@
   background-color: var(--color-bg);
 }
 
-nav {
+.navigation {
+  margin: 1rem 5rem;
+  height: 60px;
+
   display: flex;
   flex-direction: row;
   padding: 2rem 0.5rem;
-  margin: 0 5rem;
   align-items: center;
-  height: 60px;
 }
 
-header {
+.controls {
+  margin: 0rem 5rem 1rem 5rem;
+
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 1rem;
 }
 
-main {
+.content {
+  margin: 0 5rem;
   display: flex;
   flex-direction: column;
   flex: 1;
   padding: 1rem;
-  gap: 1rem;
 
   align-items: center;
 }
@@ -83,7 +86,6 @@ main {
 }
 
 .typing-area {
-  /*border: #000 solid 2px;*/
   height: calc(var(--test-line-height) * var(--visible-lines));
   max-width: 1300px;
 
