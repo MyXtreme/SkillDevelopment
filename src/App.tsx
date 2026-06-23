@@ -230,17 +230,20 @@ function App() {
     typedLength: typedText.length,
   });
 
+  const isRunning = testStatus === "running";
+  const isFinished = testStatus === "finished";
+
   return (
     <div id="app">
       <nav className="section" id="navigation">
         {/* {<img src={logo} alt="logo" />} */}
         <div className="container">
           <h1>MyXtype</h1>
-          <div className="placeholder1"></div>
+          <div className={`placeholder1 ${isRunning ? "fade-out" : ""}`}></div>
         </div>
-        <div className="placeholder1"></div>
+        <div className={`placeholder1 ${isRunning ? "fade-out" : ""}`}></div>
       </nav>
-      <header className="section" id="header">
+      <header className={`section ${isRunning ? "fade-out" : ""}`} id="header">
         {/* <div className=""> */}
         {isEditing && testStatus !== "running" ? (
           <div className="timer-menu">
@@ -340,8 +343,11 @@ function App() {
           </div>
         )}
       </main>
-      <section className="section" id="bottomer"></section>
-      <footer className="section" id="footer">
+      <section
+        className={`section ${isRunning ? "fade-out" : ""}`}
+        id="bottomer"
+      ></section>
+      <footer className={`section ${isRunning ? "fade-out" : ""}`} id="footer">
         <div className="container">
           <div className="placeholder1"></div>
           <div className="placeholder1"></div>
