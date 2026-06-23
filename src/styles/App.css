@@ -3,37 +3,83 @@
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg);
+  gap: var(--space-sm);
 }
 
-nav {
+.section {
+  display: flex;
+  align-items: center;
+
+  padding-left: var(--section-padding);
+  padding-right: var(--section-padding);
+
+  /* outline: black 2px solid; */
+}
+#navigation {
+  flex-direction: row;
+
+  align-items: center;
+  justify-content: space-between;
+
+  height: var(--nav-height);
+}
+
+#header {
+  flex-direction: row;
+
+  gap: var(--space-sm);
+  align-items: center;
+  justify-content: center;
+
+  height: var(--header-height);
+}
+
+#main {
+  flex: 1;
+}
+
+#bottomer {
+  flex-direction: row;
+
+  height: var(--bottomer-height);
+}
+
+#footer {
+  flex-direction: row;
+
+  align-items: center;
+  justify-content: space-between;
+
+  height: var(--footer-height);
+}
+
+.container {
+  padding: var(--space-xxs);
+  justify-content: space-evenly;
+  align-items: center;
+
+  gap: 1rem;
   display: flex;
   flex-direction: row;
-  padding: 2rem 0.5rem;
-  margin: 0 5rem;
-  align-items: center;
-  height: 60px;
+
+  /* outline: green 2px solid; */
 }
 
-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
+.placeholder1 {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 12px;
+  border: var(--color-text) 2px solid;
 }
 
-main {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  padding: 1rem;
-  gap: 1rem;
-
-  align-items: center;
+.placeholder2 {
+  width: 7.5rem;
+  height: 2.5rem;
+  border-radius: 12px;
+  border: var(--color-text) 2px solid;
 }
-
 .info-area {
   display: flex;
-  flex: 1;
   justify-content: center;
   align-items: center;
   font-size: 2rem;
@@ -83,7 +129,6 @@ main {
 }
 
 .typing-area {
-  /*border: #000 solid 2px;*/
   height: calc(var(--test-line-height) * var(--visible-lines));
   max-width: 1300px;
 
@@ -130,9 +175,14 @@ button {
   border-bottom: var(--color-accent) 1px solid;
 }
 
+.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
 #caret {
   font-family: Arial, Helvetica, sans-serif;
-  animation: caret-blink 1s ease-out infinite;
+  animation: caret-blink 1.5s ease-out infinite;
 }
 
 @keyframes caret-blink {

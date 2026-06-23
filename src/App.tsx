@@ -101,7 +101,7 @@ function App() {
     wpm: 0,
   };
 
-  const logo = "/favicon.svg";
+  //const logo = "";
   const [testTime, setTestTime] = useState<number>(30);
   const [customTime, setCustomTime] = useState<number>(120);
   const [time, setTime] = useState(testTime);
@@ -230,13 +230,21 @@ function App() {
     typedLength: typedText.length,
   });
 
+  const isRunning = testStatus === "running";
+  const isFinished = testStatus === "finished";
+
   return (
     <div id="app">
-      <nav>
-        <img src={logo} alt="logo" />
-        <h1>MyXtype</h1>
+      <nav className="section" id="navigation">
+        {/* {<img src={logo} alt="logo" />} */}
+        <div className="container">
+          <h1>MyXtype</h1>
+          <div className={`placeholder1 ${isRunning ? "fade-out" : ""}`}></div>
+        </div>
+        <div className={`placeholder1 ${isRunning ? "fade-out" : ""}`}></div>
       </nav>
-      <header>
+      <header className={`section ${isRunning ? "fade-out" : ""}`} id="header">
+        {/* <div className=""> */}
         {isEditing && testStatus !== "running" ? (
           <div className="timer-menu">
             <div
@@ -298,8 +306,11 @@ function App() {
             {calculatetimeTick(time)}
           </div>
         )}
+        <div className="placeholder2"></div>
+        <div className="placeholder2"></div>
+        {/* </div> */}
       </header>
-      <main>
+      <main className="section" id="main">
         {(testStatus === "running" || testStatus === "idle") && (
           <div className="typing-area">
             <div
@@ -332,6 +343,21 @@ function App() {
           </div>
         )}
       </main>
+      <section
+        className={`section ${isRunning ? "fade-out" : ""}`}
+        id="bottomer"
+      ></section>
+      <footer className={`section ${isRunning ? "fade-out" : ""}`} id="footer">
+        <div className="container">
+          <div className="placeholder1"></div>
+          <div className="placeholder1"></div>
+          <div className="placeholder1"></div>
+        </div>
+        <div className="container">
+          <div className="placeholder1"></div>
+          <div className="placeholder1"></div>
+        </div>
+      </footer>
     </div>
   );
 }
