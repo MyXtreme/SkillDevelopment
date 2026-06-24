@@ -8,7 +8,6 @@
 
 .section {
   display: flex;
-  align-items: center;
 
   padding-left: var(--section-padding);
   padding-right: var(--section-padding);
@@ -36,6 +35,9 @@
 
 #main {
   flex: 1;
+
+  display: flex;
+  outline: black 2px solid;
 }
 
 #bottomer {
@@ -68,15 +70,15 @@
 .placeholder1 {
   width: 3rem;
   height: 3rem;
-  border-radius: 12px;
-  border: var(--color-text) 2px solid;
+  border-radius: var(--corner);
+  border: var(--color-primary) 2px solid;
 }
 
 .placeholder2 {
   width: 7.5rem;
   height: 2.5rem;
-  border-radius: 12px;
-  border: var(--color-text) 2px solid;
+  border-radius: var(--corner);
+  border: var(--color-primary) 2px solid;
 }
 .info-area {
   display: flex;
@@ -86,7 +88,7 @@
   min-height: 3rem;
   cursor: pointer;
 
-  border-radius: 12px;
+  border-radius: var(--corner);
   background-color: var(--color-bg);
 }
 
@@ -100,12 +102,12 @@
   gap: 2rem;
   min-height: 3rem;
 
-  border-radius: 12px;
+  border-radius: var(--corner);
   background-color: var(--color-bg);
 }
 
 .timer-menu > div {
-  border-radius: 8px;
+  border-radius: var(--corner);
   cursor: pointer;
 }
 
@@ -120,10 +122,10 @@
   height: 2rem;
 
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--corner);
 
   background: var(--color-bg);
-  color: var(--color-text);
+  color: var(--color-primary);
 
   text-align: center;
 }
@@ -135,7 +137,7 @@
   margin: 0 auto;
   overflow: hidden;
 
-  border-radius: 12px;
+  border-radius: var(--corner);
   background-color: var(--color-bg);
 }
 
@@ -144,23 +146,51 @@
   line-height: var(--test-line-height);
 }
 .results-area {
+  flex: 1;
+  display: grid;
+
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: 2fr 1fr auto;
+
+  grid-template-areas:
+    "graph graph graph"
+    "metrics smpltext smpltext"
+    "button button button";
+
+  border-radius: var(--corner);
+  gap: 1.5rem;
+  margin-block: var(--space-3xl);
+
+  outline: blue 2px solid;
+}
+
+.metrics {
+  grid-area: metrics;
+}
+
+.simple-text {
+  grid-area: smpltext;
+}
+
+.graph {
+  grid-area: graph;
+}
+
+.action-buttons {
+  grid-area: button;
+
   display: flex;
-  flex-direction: column;
   justify-content: center;
   gap: 1rem;
 }
 
-button {
-  width: 10rem;
-}
-
 .idle-char {
-  color: var(--color-text);
+  color: var(--color-primary);
   opacity: 80%;
 }
 
 .correct-char {
-  color: var(--color-text);
+  color: var(--color-primary);
 }
 
 .incorrect-char {
@@ -170,11 +200,14 @@ button {
 }
 
 .wpm {
-  font-size: 4rem;
-  color: var(--color-text);
+  font-size: 2rem;
+  color: var(--color-primary);
   border-bottom: var(--color-accent) 1px solid;
 }
 
+.notwpm {
+  color: var(--color-primary);
+}
 .fade-out {
   opacity: 0;
   pointer-events: none;

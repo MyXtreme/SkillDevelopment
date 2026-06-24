@@ -22,6 +22,8 @@
   --space-xxl: 64px;
   --space-3xl: 80px;
 
+  --corner: 12px;
+
   /* Theme template: 
     --color-bg: value;
     --color-primary: value;         <- main colour for text or element
@@ -31,7 +33,8 @@
   */
   /*Iron gall ink theme*/
   --color-bg: #e0c9a6;
-  --color-text: #3e353b;
+  --color-primary: #3e353b;
+  --color-seconday: ;
   --color-accent: #e63946;
   /*-------------------*/
 }

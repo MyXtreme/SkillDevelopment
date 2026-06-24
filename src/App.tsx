@@ -236,80 +236,83 @@ function App() {
   return (
     <div id="app">
       <nav className="section" id="navigation">
-        {/* {<img src={logo} alt="logo" />} */}
+        {/* TODO: add logo */}
         <div className="container">
           <h1>MyXtype</h1>
           <div className={`placeholder1 ${isRunning ? "fade-out" : ""}`}></div>
         </div>
         <div className={`placeholder1 ${isRunning ? "fade-out" : ""}`}></div>
       </nav>
-      <header className={`section ${isRunning ? "fade-out" : ""}`} id="header">
-        {/* <div className=""> */}
-        {isEditing && testStatus !== "running" ? (
-          <div className="timer-menu">
+      {!isFinished && (
+        <header
+          className={`section ${isRunning ? "fade-out" : ""}`}
+          id="header"
+        >
+          {isEditing && testStatus === "idle" ? (
+            <div className="timer-menu">
+              <div
+                onClick={() => {
+                  const newTime = 15;
+                  setTestTime(newTime);
+                  setIsEditing(false);
+                  setTime(newTime);
+                }}
+              >
+                15s
+              </div>
+              <div
+                onClick={() => {
+                  const newTime = 30;
+                  setTestTime(newTime);
+                  setIsEditing(false);
+                  setTime(newTime);
+                }}
+              >
+                30s
+              </div>
+              <div
+                onClick={() => {
+                  const newTime = 60;
+                  setTestTime(newTime);
+                  setIsEditing(false);
+                  setTime(newTime);
+                }}
+              >
+                60s
+              </div>
+              <input
+                id="timer-input"
+                className="clear-input"
+                type="number"
+                min={1}
+                max={1800}
+                value={customTime}
+                onChange={(e) => setCustomTime(Number(e.target.value))}
+                onBlur={() => {
+                  setTestTime(customTime);
+                  setTime(customTime);
+                  setIsEditing(false);
+                }}
+              />
+            </div>
+          ) : (
             <div
+              className="info-area"
               onClick={() => {
-                const newTime = 15;
-                setTestTime(newTime);
-                setIsEditing(false);
-                setTime(newTime);
+                if (testStatus === "running") {
+                  setIsEditing(false);
+                  return;
+                }
+                setIsEditing(true);
               }}
             >
-              15s
+              {calculatetimeTick(time)}
             </div>
-            <div
-              onClick={() => {
-                const newTime = 30;
-                setTestTime(newTime);
-                setIsEditing(false);
-                setTime(newTime);
-              }}
-            >
-              30s
-            </div>
-            <div
-              onClick={() => {
-                const newTime = 60;
-                setTestTime(newTime);
-                setIsEditing(false);
-                setTime(newTime);
-              }}
-            >
-              60s
-            </div>
-            <input
-              id="timer-input"
-              className="clear-input"
-              type="number"
-              min={1}
-              max={1800}
-              value={customTime}
-              onChange={(e) => setCustomTime(Number(e.target.value))}
-              onBlur={() => {
-                setTestTime(customTime);
-                setTime(customTime);
-                setIsEditing(false);
-              }}
-            />
-          </div>
-        ) : (
-          <div
-            className="info-area"
-            onClick={() => {
-              if (testStatus === "running") {
-                setIsEditing(false);
-                return;
-              }
-              setIsEditing(true);
-            }}
-          >
-            {calculatetimeTick(time)}
-          </div>
-        )}
-        <div className="placeholder2"></div>
-        <div className="placeholder2"></div>
-        {/* </div> */}
-      </header>
+          )}
+          <div className="placeholder2"></div>
+          <div className="placeholder2"></div>
+        </header>
+      )}
       <main className="section" id="main">
         {(testStatus === "running" || testStatus === "idle") && (
           <div className="typing-area">
@@ -321,11 +324,19 @@ function App() {
             </div>
           </div>
         )}
-        {testStatus === "finished" && (
+        {isFinished && (
           <div className="results-area">
-            <div className="wpm">WPM: {results.wpm}</div>
-            <div className="metrics">Accuracy: {results.accuracy}%</div>
-            <div className="metrics">Raw speed: {results.raw}</div>
+            <div className="metrics">
+              <div className="wpm">WPM: {results.wpm}</div>
+              <div className="notwpm">Accuracy: {results.accuracy}%</div>
+              <div className="notwpm">Raw speed: {results.raw}</div>
+            </div>
+            <div className="simple-text">
+              <div className="placeholder1"></div>
+            </div>
+            <div className="graph">
+              <div className="placeholder1"></div>
+            </div>
             <div className="action-buttons">
               <button
                 onMouseDown={(e) => e.preventDefault()}
