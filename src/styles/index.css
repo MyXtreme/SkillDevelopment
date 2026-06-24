@@ -34,9 +34,12 @@
   /*Iron gall ink theme*/
   --color-bg: #e0c9a6;
   --color-primary: #3e353b;
-  --color-seconday: ;
-  --color-accent: #e63946;
+  --color-secondary: #766b72;
+  --color-accent: ;
   /*-------------------*/
+
+  --color-incorrect: #e63946;
+  --color-correct: #588157;
 }
 
 *,

@@ -37,7 +37,6 @@
   flex: 1;
 
   display: flex;
-  outline: black 2px solid;
 }
 
 #bottomer {
@@ -130,11 +129,18 @@
   text-align: center;
 }
 
+.typing-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .typing-area {
   height: calc(var(--test-line-height) * var(--visible-lines));
   max-width: 1300px;
 
-  margin: 0 auto;
+  margin-block: center;
   overflow: hidden;
 
   border-radius: var(--corner);
@@ -160,8 +166,6 @@
   border-radius: var(--corner);
   gap: 1.5rem;
   margin-block: var(--space-3xl);
-
-  outline: blue 2px solid;
 }
 
 .metrics {
@@ -170,10 +174,14 @@
 
 .simple-text {
   grid-area: smpltext;
+
+  outline: 2px solid black;
 }
 
 .graph {
   grid-area: graph;
+
+  outline: 2px solid black;
 }
 
 .action-buttons {
@@ -185,8 +193,7 @@
 }
 
 .idle-char {
-  color: var(--color-primary);
-  opacity: 80%;
+  color: var(--color-secondary);
 }
 
 .correct-char {
@@ -194,7 +201,7 @@
 }
 
 .incorrect-char {
-  color: var(--color-accent);
+  color: var(--color-incorrect);
   background-color: rgba(230, 57, 70, 10%);
   border-radius: 4px;
 }
@@ -202,7 +209,7 @@
 .wpm {
   font-size: 2rem;
   color: var(--color-primary);
-  border-bottom: var(--color-accent) 1px solid;
+  border-bottom: var(--color-incorrect) 1px solid;
 }
 
 .notwpm {

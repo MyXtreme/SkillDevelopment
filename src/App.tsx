@@ -315,12 +315,14 @@ function App() {
       )}
       <main className="section" id="main">
         {(testStatus === "running" || testStatus === "idle") && (
-          <div className="typing-area">
-            <div
-              className="typing-content"
-              style={{ transform: `translateY(-${scrollOffset}px)` }}
-            >
-              {spanSplittedCurrentText(currentText, typedText)}
+          <div className="typing-wrapper">
+            <div className="typing-area">
+              <div
+                className="typing-content"
+                style={{ transform: `translateY(-${scrollOffset}px)` }}
+              >
+                {spanSplittedCurrentText(currentText, typedText)}
+              </div>
             </div>
           </div>
         )}
