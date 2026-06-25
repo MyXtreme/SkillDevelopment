@@ -132,8 +132,7 @@ function App() {
     const handlekeydown = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement) return;
       if (testStatus === "finished" && time <= 0) return;
-
-      setTestStatus("running");
+      if (testStatus === "idle") setTestStatus("running");
       event.preventDefault();
 
       if (event.key === "Tab") {
@@ -328,16 +327,26 @@ function App() {
         )}
         {isFinished && (
           <div className="results-area">
-            <div className="metrics">
-              <div className="wpm">WPM: {results.wpm}</div>
-              <div className="notwpm">Accuracy: {results.accuracy}%</div>
-              <div className="notwpm">Raw speed: {results.raw}</div>
-            </div>
-            <div className="simple-text">
+            <div className="visual">
               <div className="placeholder1"></div>
             </div>
-            <div className="graph">
-              <div className="placeholder1"></div>
+            <div className="results">
+              <div className="main-metrics">
+                <div className="main-unit">
+                  WPM
+                  <div className="main-value">{results.wpm} </div>
+                </div>
+                <div className="main-unit">
+                  ACC
+                  <div className="main-value">{results.accuracy}% </div>
+                </div>
+              </div>
+              <div className="secondary-metrics">
+                <div className="unit">
+                  Raw speed: <div className="unit-value">{results.raw}</div>
+                </div>
+                <div className="unit">Consistency</div>
+              </div>
             </div>
             <div className="action-buttons">
               <button
