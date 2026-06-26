@@ -77,26 +77,22 @@
   border-radius: var(--corner);
   border: var(--color-primary) 2px solid;
 }
-.display-panels {
+
+.panels {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
+  font-size: 1.5rem;
 
   border-radius: var(--corner);
   background-color: var(--color-bg);
 }
+.display-panels {
+}
 
 .configuration-panels {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xs);
-
-  border-radius: var(--corner);
-  background-color: var(--color-bg);
 }
 
 /*.display-panels > button:hover,
@@ -224,6 +220,10 @@
 }
 
 .unit-value {
+  color: var(--color-accent);
+}
+
+.active {
   color: var(--color-accent);
 }
 

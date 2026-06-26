@@ -3,7 +3,7 @@
   font-size: 16px;
 
   --test-font-size: 4rem;
-  --time-font-size: 1.5rem;
+  --time-font-size: 4rem;
   --test-line-height: 6rem;
   --visible-lines: 3;
 
@@ -37,7 +37,7 @@
   --color-bg: #e0c9a6;
   --color-primary: #3e353b;
   --color-secondary: #766b72;
-  --color-accent: #e63946;
+  --color-accent: #355c7d;
   /*-------------------*/
 
   --color-incorrect: #e63946;
