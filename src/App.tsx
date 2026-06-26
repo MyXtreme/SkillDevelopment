@@ -1,4 +1,5 @@
-import { useState, useEffect, Fragment, use } from "react";
+import { useState, useEffect, Fragment } from "react";
+import clsx from "clsx";
 import commonWords from "./data/commonWordsEng.ts";
 import "./styles/App.css";
 
@@ -242,13 +243,15 @@ function App() {
         {/* TODO: add logo */}
         <div className="container">
           <h1>MyXtype</h1>
-          <div className={`placeholder1 ${isRunning ? "fade-out" : ""}`}></div>
+          <div
+            className={clsx("placeholder1", { "fade-out": isRunning })}
+          ></div>
         </div>
-        <div className={`placeholder1 ${isRunning ? "fade-out" : ""}`}></div>
+        <div className={clsx("placeholder1", { "fade-out": isRunning })}></div>
       </nav>
       {!isFinished && (
         <header
-          className={`section ${isRunning ? "fade-out" : ""}`}
+          className={clsx("section", { "fade-out": isRunning })}
           id="header"
         >
           <div className="display-panels">
@@ -377,10 +380,13 @@ function App() {
         )}
       </main>
       <section
-        className={`section ${isRunning ? "fade-out" : ""}`}
+        className={clsx("section", { "fade-out": isRunning })}
         id="bottomer"
       ></section>
-      <footer className={`section ${isRunning ? "fade-out" : ""}`} id="footer">
+      <footer
+        className={clsx("section", { "fade-out": isRunning })}
+        id="footer"
+      >
         <div className="container">
           <div className="placeholder1"></div>
           <div className="placeholder1"></div>
