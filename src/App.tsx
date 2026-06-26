@@ -108,9 +108,8 @@ function App() {
   const [activePanel, setActivePanel] = useState<ActivePanel>("none");
   const [testTime, setTestTime] = useState<number>(30);
   const [testWordCount, setTestWordCount] = useState<number>(60);
-  const [customTime, setCustomTime] = useState<number>(120);
   const [time, setTime] = useState<number>(testTime);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isActive, setIsActive] = useState<boolean>(false);
   const [testStatus, setTestStatus] = useState<TestStatus>("idle");
   const [testMode] = useState<TestMode>("classic");
   const [typedText, setTypedText] = useState<string>("");
@@ -124,12 +123,14 @@ function App() {
     setTestStatus("idle");
     setTypedText("");
     setTime(testTime);
+    setActivePanel("none");
   };
 
   const handleTestNext = () => {
     setTestStatus("idle");
     setTypedText("");
     setTime(testTime);
+    setActivePanel("none");
     setCurrentText(texGeneration(commonWords));
   };
 
@@ -227,13 +228,6 @@ function App() {
     }
   }, [typedText]);
 
-  console.log("RENDER", {
-    testStatus,
-    isEditing,
-    time,
-    typedLength: typedText.length,
-  });
-
   const isRunning = testStatus === "running";
   const isFinished = testStatus === "finished";
 
@@ -254,13 +248,21 @@ function App() {
           className={clsx("section", { "fade-out": isRunning })}
           id="header"
         >
-          <div className="display-panels">
-            <button onClick={() => setActivePanel("testTime")}>Time</button>
-            <button onClick={() => setActivePanel("testWordCount")}>
+          <div className="panels display-panels">
+            <button
+              className={clsx({ active: activePanel === "testTime" })}
+              onClick={() => setActivePanel("testTime")}
+            >
+              Time
+            </button>
+            <button
+              className={clsx({ active: activePanel === "testWordCount" })}
+              onClick={() => setActivePanel("testWordCount")}
+            >
               Word
             </button>
           </div>
-          <div className="configuration-panels">
+          <div className="panels configuration-panels">
             {activePanel === "testTime" && (
               <div className="configuration-panels">
                 <button
