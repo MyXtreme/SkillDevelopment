@@ -95,8 +95,14 @@ const calculateResults = (
 function App() {
   type TestStatus = "idle" | "running" | "finished";
 
-  type ActivePanel = "none" | "testTime" | "testWordCount";
+  type ActivePanel = "none" | "duration" | "words" | "complexity";
   type TestMode = "classic" | "race" | "story" | "chat";
+  type Complexity = {
+    simple: boolean;
+    punctuation: boolean;
+    numbers: boolean;
+    upperCase: boolean;
+  };
 
   const result = {
     accuracy: 0,
@@ -106,15 +112,21 @@ function App() {
 
   //const logo = "";
   const [activePanel, setActivePanel] = useState<ActivePanel>("none");
-  const [testTime, setTestTime] = useState<number>(30);
-  const [testWordCount, setTestWordCount] = useState<number>(60);
-  const [time, setTime] = useState<number>(testTime);
+  const [duration, setDuration] = useState<number>(30);
+  const [words, setWords] = useState<number>(60);
+  const [complexity, setComplexity] = useState<Complexity>({
+    simple: true,
+    punctuation: false,
+    numbers: false,
+    upperCase: false,
+  });
+  const [time, setTime] = useState<number>(duration);
   const [isActive, setIsActive] = useState<boolean>(false);
   const [testStatus, setTestStatus] = useState<TestStatus>("idle");
   const [testMode] = useState<TestMode>("classic");
   const [typedText, setTypedText] = useState<string>("");
   const [currentText, setCurrentText] = useState<string>(() =>
-    texGeneration(commonWords, testWordCount),
+    texGeneration(commonWords, words),
   );
   const [scrollOffset, setScrollOffset] = useState(0);
   const [results, setResults] = useState(result);
@@ -122,16 +134,23 @@ function App() {
   const handleTestReset = () => {
     setTestStatus("idle");
     setTypedText("");
-    setTime(testTime);
+    setTime(duration);
     setActivePanel("none");
   };
 
   const handleTestNext = () => {
     setTestStatus("idle");
     setTypedText("");
-    setTime(testTime);
+    setTime(duration);
     setActivePanel("none");
     setCurrentText(texGeneration(commonWords));
+  };
+
+  const toggleProperty = (property: keyof Complexity) => {
+    setComplexity((prevComplexity) => ({
+      ...prevComplexity,
+      [property]: !prevComplexity[property],
+    }));
   };
 
   useEffect(() => {
@@ -185,7 +204,7 @@ function App() {
   useEffect(() => {
     if (time === 0) {
       setTestStatus("finished");
-      setResults(calculateResults(currentText, typedText, testTime));
+      setResults(calculateResults(currentText, typedText, duration));
     }
   }, [time]);
 
@@ -231,6 +250,8 @@ function App() {
   const isRunning = testStatus === "running";
   const isFinished = testStatus === "finished";
 
+  console.log(complexity);
+
   return (
     <div id="app">
       <nav className="section" id="navigation">
@@ -250,25 +271,31 @@ function App() {
         >
           <div className="panels display-panels">
             <button
-              className={clsx({ active: activePanel === "testTime" })}
-              onClick={() => setActivePanel("testTime")}
+              className={clsx({ active: activePanel === "duration" })}
+              onClick={() => setActivePanel("duration")}
             >
-              Time
+              Duration
             </button>
             <button
-              className={clsx({ active: activePanel === "testWordCount" })}
-              onClick={() => setActivePanel("testWordCount")}
+              className={clsx({ active: activePanel === "words" })}
+              onClick={() => setActivePanel("words")}
             >
-              Word
+              Words
+            </button>
+            <button
+              className={clsx({ active: activePanel === "complexity" })}
+              onClick={() => setActivePanel("complexity")}
+            >
+              Complexity
             </button>
           </div>
           <div className="panels configuration-panels">
-            {activePanel === "testTime" && (
-              <div className="configuration-panels">
+            {activePanel === "duration" && (
+              <div className={clsx("panels configuration-panels")}>
                 <button
                   onClick={() => {
                     const newTime = 15;
-                    setTestTime(newTime);
+                    setDuration(newTime);
                     setTime(newTime);
                   }}
                 >
@@ -277,7 +304,7 @@ function App() {
                 <button
                   onClick={() => {
                     const newTime = 30;
-                    setTestTime(newTime);
+                    setDuration(newTime);
                     setTime(newTime);
                   }}
                 >
@@ -286,7 +313,7 @@ function App() {
                 <button
                   onClick={() => {
                     const newTime = 60;
-                    setTestTime(newTime);
+                    setDuration(newTime);
                     setTime(newTime);
                   }}
                 >
@@ -294,12 +321,12 @@ function App() {
                 </button>
               </div>
             )}
-            {activePanel === "testWordCount" && (
-              <div className="configuration-panels">
+            {activePanel === "words" && (
+              <div className="panels configuration-panels">
                 <button
                   onClick={() => {
                     const wordCount = 40;
-                    setTestWordCount(wordCount);
+                    setWords(wordCount);
                   }}
                 >
                   40
@@ -307,7 +334,7 @@ function App() {
                 <button
                   onClick={() => {
                     const wordCount = 60;
-                    setTestWordCount(wordCount);
+                    setWords(wordCount);
                   }}
                 >
                   60
@@ -315,10 +342,38 @@ function App() {
                 <button
                   onClick={() => {
                     const wordCount = 80;
-                    setTestWordCount(wordCount);
+                    setWords(wordCount);
                   }}
                 >
                   80
+                </button>
+              </div>
+            )}
+            {activePanel === "complexity" && (
+              <div className="panels configuration-panels">
+                <button
+                  className={clsx({ active: complexity.punctuation })}
+                  onClick={() => {
+                    toggleProperty("punctuation");
+                  }}
+                >
+                  Punctuation
+                </button>
+                <button
+                  className={clsx({ active: complexity.numbers })}
+                  onClick={() => {
+                    toggleProperty("numbers");
+                  }}
+                >
+                  Numbers
+                </button>
+                <button
+                  className={clsx({ active: complexity.upperCase })}
+                  onClick={() => {
+                    toggleProperty("upperCase");
+                  }}
+                >
+                  Upper-case
                 </button>
               </div>
             )}
