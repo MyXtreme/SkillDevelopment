@@ -3,6 +3,7 @@
   font-size: 16px;
 
   --test-font-size: 4rem;
+  --time-font-size: 1.5rem;
   --test-line-height: 6rem;
   --visible-lines: 3;
 
@@ -130,4 +131,22 @@ h6 {
 #root,
 #__next {
   isolation: isolate;
+}
+
+/* Complete button reset */
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  background: transparent;
+  color: inherit;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }

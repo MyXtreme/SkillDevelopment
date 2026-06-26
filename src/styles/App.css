@@ -25,7 +25,7 @@
 #header {
   flex-direction: row;
 
-  gap: var(--space-sm);
+  gap: var(--space-md);
   align-items: center;
   justify-content: center;
 
@@ -34,6 +34,7 @@
 
 #main {
   flex: 1;
+  position: relative;
 }
 
 #bottomer {
@@ -76,42 +77,33 @@
   border-radius: var(--corner);
   border: var(--color-primary) 2px solid;
 }
-.info-area {
+.display-panels {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
   align-items: center;
-  font-size: 2rem;
-  min-height: 3rem;
-  cursor: pointer;
+  justify-content: space-between;
+  gap: var(--space-xs);
 
   border-radius: var(--corner);
   background-color: var(--color-bg);
 }
 
-.timer-menu {
+.configuration-panels {
   display: flex;
-  flex: 1;
-
-  justify-content: center;
+  flex-direction: row;
   align-items: center;
-  font-size: 2rem;
-  gap: 2rem;
-  min-height: 3rem;
+  justify-content: space-between;
+  gap: var(--space-xs);
 
   border-radius: var(--corner);
   background-color: var(--color-bg);
 }
 
-.timer-menu > div {
-  border-radius: var(--corner);
+/*.display-panels > button:hover,
+.configuration-panels > button:hover {
   cursor: pointer;
-}
-
-.timer-menu > div:hover,
-#timer-input:hover,
-.info-area:hover {
-  background-color: #fbe1a9;
-}
+  color: var(--color-accent);
+}*/
 
 #timer-input {
   width: 6rem;
@@ -131,6 +123,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.test-progress {
+  position: absolute;
+  font-size: var(--time-font-size);
+  color: var(--color-accent);
+
+  top: var(--space-md);
+  left: center;
 }
 
 .typing-area {
@@ -270,4 +271,8 @@
   to {
     opacity: 1;
   }
+}
+
+button:hover {
+  color: var(--color-accent);
 }

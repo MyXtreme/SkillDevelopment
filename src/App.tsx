@@ -93,6 +93,8 @@ const calculateResults = (
 
 function App() {
   type TestStatus = "idle" | "running" | "finished";
+
+  type ActivePanel = "none" | "testTime" | "testWordCount";
   type TestMode = "classic" | "race" | "story" | "chat";
 
   const result = {
@@ -102,15 +104,17 @@ function App() {
   };
 
   //const logo = "";
+  const [activePanel, setActivePanel] = useState<ActivePanel>("none");
   const [testTime, setTestTime] = useState<number>(30);
+  const [testWordCount, setTestWordCount] = useState<number>(60);
   const [customTime, setCustomTime] = useState<number>(120);
-  const [time, setTime] = useState(testTime);
+  const [time, setTime] = useState<number>(testTime);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [testStatus, setTestStatus] = useState<TestStatus>("idle");
   const [testMode] = useState<TestMode>("classic");
   const [typedText, setTypedText] = useState<string>("");
   const [currentText, setCurrentText] = useState<string>(() =>
-    texGeneration(commonWords),
+    texGeneration(commonWords, testWordCount),
   );
   const [scrollOffset, setScrollOffset] = useState(0);
   const [results, setResults] = useState(result);
@@ -247,74 +251,81 @@ function App() {
           className={`section ${isRunning ? "fade-out" : ""}`}
           id="header"
         >
-          {isEditing && testStatus === "idle" ? (
-            <div className="timer-menu">
-              <div
-                onClick={() => {
-                  const newTime = 15;
-                  setTestTime(newTime);
-                  setIsEditing(false);
-                  setTime(newTime);
-                }}
-              >
-                15s
+          <div className="display-panels">
+            <button onClick={() => setActivePanel("testTime")}>Time</button>
+            <button onClick={() => setActivePanel("testWordCount")}>
+              Word
+            </button>
+          </div>
+          <div className="configuration-panels">
+            {activePanel === "testTime" && (
+              <div className="configuration-panels">
+                <button
+                  onClick={() => {
+                    const newTime = 15;
+                    setTestTime(newTime);
+                    setTime(newTime);
+                  }}
+                >
+                  15s
+                </button>
+                <button
+                  onClick={() => {
+                    const newTime = 30;
+                    setTestTime(newTime);
+                    setTime(newTime);
+                  }}
+                >
+                  30s
+                </button>
+                <button
+                  onClick={() => {
+                    const newTime = 60;
+                    setTestTime(newTime);
+                    setTime(newTime);
+                  }}
+                >
+                  60s
+                </button>
               </div>
-              <div
-                onClick={() => {
-                  const newTime = 30;
-                  setTestTime(newTime);
-                  setIsEditing(false);
-                  setTime(newTime);
-                }}
-              >
-                30s
+            )}
+            {activePanel === "testWordCount" && (
+              <div className="configuration-panels">
+                <button
+                  onClick={() => {
+                    const wordCount = 40;
+                    setTestWordCount(wordCount);
+                  }}
+                >
+                  40
+                </button>
+                <button
+                  onClick={() => {
+                    const wordCount = 60;
+                    setTestWordCount(wordCount);
+                  }}
+                >
+                  60
+                </button>
+                <button
+                  onClick={() => {
+                    const wordCount = 80;
+                    setTestWordCount(wordCount);
+                  }}
+                >
+                  80
+                </button>
               </div>
-              <div
-                onClick={() => {
-                  const newTime = 60;
-                  setTestTime(newTime);
-                  setIsEditing(false);
-                  setTime(newTime);
-                }}
-              >
-                60s
-              </div>
-              <input
-                id="timer-input"
-                className="clear-input"
-                type="number"
-                min={1}
-                max={1800}
-                value={customTime}
-                onChange={(e) => setCustomTime(Number(e.target.value))}
-                onBlur={() => {
-                  setTestTime(customTime);
-                  setTime(customTime);
-                  setIsEditing(false);
-                }}
-              />
-            </div>
-          ) : (
-            <div
-              className="info-area"
-              onClick={() => {
-                if (testStatus === "running") {
-                  setIsEditing(false);
-                  return;
-                }
-                setIsEditing(true);
-              }}
-            >
-              {calculatetimeTick(time)}
-            </div>
-          )}
-          <div className="placeholder2"></div>
-          <div className="placeholder2"></div>
+            )}
+          </div>
         </header>
       )}
       <main className="section" id="main">
         {(testStatus === "running" || testStatus === "idle") && (
           <div className="typing-wrapper">
+            <div className={`test-progress ${isRunning ? "" : "fade-out"}`}>
+              {calculatetimeTick(time)}
+            </div>
             <div className="typing-area">
               <div
                 className="typing-content"
