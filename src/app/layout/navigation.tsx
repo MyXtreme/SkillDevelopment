@@ -1,9 +1,9 @@
 import clsx from "clsx";
-type Navigation = {
-  immersive: boolean;
-};
+import { useAppContext } from "../../context/appContext";
 
-function Navigation({ immersive }: Navigation) {
+function Navigation() {
+  const { app } = useAppContext();
+  const immersive = app.layoutMode === "focused";
   return (
     <nav className="section" id="navigation">
       {/* TODO: add logo */}
