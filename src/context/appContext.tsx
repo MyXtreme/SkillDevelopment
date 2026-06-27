@@ -1,5 +1,6 @@
 import {
   useState,
+  useContext,
   createContext,
   type ReactNode,
   type Dispatch,
@@ -31,4 +32,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
 
   return <AppContext value={{ appState, setAppState }}>{children}</AppContext>;
+}
+
+export function useAppContext() {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error("useAppContext must be used within a AppProvider");
+  }
+  return context;
 }
