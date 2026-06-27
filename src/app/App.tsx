@@ -1,7 +1,9 @@
 import { useState, useEffect, Fragment } from "react";
 import clsx from "clsx";
-import commonWords from "./data/commonWordsEng.ts";
-import "./styles/App.css";
+import commonWords from "../data/commonWordsEng.ts";
+import "./App.css";
+
+import Navigation from "./layout/navigation.tsx";
 
 function texGeneration(source: string[] = commonWords, wordRange = 40): string {
   const dataset: string[] = source;
@@ -93,6 +95,13 @@ const calculateResults = (
 };
 
 function App() {
+  // TODO: Global variables that need to create context
+  // type Skill = "typing" | "reading" | "memory";
+  // type Theme = "iron-gall-Old" | "iron-gall" | "type-writer" | "dark";
+  // type LayoutMode = "normal" | "focused";
+
+  const [immersive, setImmersive] = useState<boolean>(false);
+
   type TestStatus = "idle" | "running" | "finished";
 
   type ActivePanel = "none" | "duration" | "words" | "complexity";
@@ -254,16 +263,7 @@ function App() {
 
   return (
     <div id="app">
-      <nav className="section" id="navigation">
-        {/* TODO: add logo */}
-        <div className="container">
-          <h1>MyXtype</h1>
-          <div
-            className={clsx("placeholder1", { "fade-out": isRunning })}
-          ></div>
-        </div>
-        <div className={clsx("placeholder1", { "fade-out": isRunning })}></div>
-      </nav>
+      <Navigation immersive={immersive} />
       {!isFinished && (
         <header
           className={clsx("section", { "fade-out": isRunning })}
