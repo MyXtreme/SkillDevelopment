@@ -10,11 +10,15 @@ export type AppStateType = {
   layoutMode: LayoutMode;
 };
 
-interface AppContextType {
-  appState: AppStateType;
+export type AppActionType = {
   changeSkill: (skill: Skill) => void;
   changeTheme: (theme: Theme) => void;
   changeLayoutMode: (layoutMode: LayoutMode) => void;
+};
+
+interface AppContextType {
+  app: AppStateType;
+  action: AppActionType;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -38,13 +42,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setApp((prev) => ({ ...prev, layoutMode: newLayoutMode }));
   };
 
-  return (
-    <AppContext
-      value={{ appState: app, changeSkill, changeTheme, changeLayoutMode }}
-    >
-      {children}
-    </AppContext>
-  );
+  const action = {
+    changeSkill,
+    changeTheme,
+    changeLayoutMode,
+  };
+
+  return <AppContext value={{ app, action }}>{children}</AppContext>;
 }
 
 export function useAppContext() {
