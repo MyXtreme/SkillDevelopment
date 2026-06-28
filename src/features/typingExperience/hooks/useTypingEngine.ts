@@ -4,7 +4,7 @@ import { useAppContext } from "../../../context/appContext";
 import { randomTexGeneration } from "../utils/textUtils";
 
 export function useTypingEngine() {
-  const { app } = useAppContext();
+  const { action } = useAppContext();
   const { typingState, typingAction } = useTypingContext();
   const [time, setTime] = useState<number>(typingState.config.duration);
   const [typedText, setTypedText] = useState<string>("");
@@ -78,6 +78,7 @@ export function useTypingEngine() {
       if (event.target instanceof HTMLInputElement) return;
       if (typingState.status === "finished" && time <= 0) return;
       if (typingState.status === "idle") {
+        action.changeLayoutMode("focused");
         typingAction.setStatus("running");
       }
       event.preventDefault();
@@ -148,6 +149,7 @@ export function useTypingEngine() {
   useEffect(() => {
     if (time === 0) {
       typingAction.setStatus("finished");
+      action.changeLayoutMode("normal");
       const results = {
         ...typingState.session,
         summary: calculateResults(
