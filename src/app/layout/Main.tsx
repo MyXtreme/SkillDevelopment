@@ -1,9 +1,10 @@
 import TypingExperience from "../../features/typingExperience/TypingExperience";
+import { useAppContext, type AppStateType } from "../../context/appContext";
 
-const skill = "typing";
+// TODO: Later the router should set dynamically the context variable
 
-const renderContent = () => {
-  switch (skill) {
+const renderContent = (app: AppStateType) => {
+  switch (app.skill) {
     case "typing":
       return <TypingExperience />;
     /*
@@ -18,7 +19,8 @@ const renderContent = () => {
   }
 };
 function Main() {
-  return <>{renderContent()}</>;
+  const { app } = useAppContext();
+  return <>{renderContent(app)}</>;
 }
 
 export default Main;

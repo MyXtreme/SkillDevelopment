@@ -7,14 +7,14 @@ import TypingSession from "./components/TypingSession";
 import TypingResults from "./components/TypingResults";
 import { useTypingEngine } from "./hooks/useTypingEngine";
 
-const { app } = useAppContext();
-const { typingState } = useTypingContext();
-
-const isIdle = typingState.status === "idle";
-const isRunning = typingState.status === "running";
-const isFinished = typingState.status === "finished";
-
 function TypingView() {
+  const { app } = useAppContext();
+  const { typingState } = useTypingContext();
+
+  const isIdle = typingState.status === "idle";
+  const isRunning = typingState.status === "running";
+  const isFinished = typingState.status === "finished";
+
   const { handleRetry, handleNext, handleClickDuration } = useTypingEngine();
   const immersive = app.layoutMode === "focused";
   return (

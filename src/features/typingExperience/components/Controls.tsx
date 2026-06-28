@@ -6,22 +6,21 @@ import {
   type TypingConfiguration,
 } from "../context/TypingContext";
 
-const { typingState } = useTypingContext();
-
 interface TypingControlsProps {
-  onClickDuration: (duration: typeof typingState.config.duration) => void;
-  //   onClickContent: (content: typeof typingState.config.content) => void;
-  //   onClickDifficulty: (difficulty: typeof typingState.config.difficulty) => void;
+  onClickDuration: (duration: TypingConfiguration["duration"]) => void;
+  //   onClickContent: (content: TypingConfiguration["content"]) => void;
+  //   onClickDifficulty: (difficulty: TypingConfiguration["difficulty"]) => void;
 }
-
-type ActivePanel = "none" | keyof TypingConfiguration;
-const [activePanel, setActivePanel] = useState<ActivePanel>("none");
 
 function Controls({ onClickDuration }: TypingControlsProps) {
   const { app } = useAppContext();
+  const { typingState } = useTypingContext();
   const immersive = app.layoutMode === "focused";
+
+  type ActivePanel = "none" | keyof TypingConfiguration;
+  const [activePanel, setActivePanel] = useState<ActivePanel>("none");
   return (
-    <header className={clsx({ "fade-out": immersive })} id="header">
+    <header className={clsx("section", { "fade-out": immersive })} id="header">
       <div className="panels display-panels">
         <button onClick={() => setActivePanel("duration")}>Duration</button>
         <button onClick={() => setActivePanel("content")}>Content</button>

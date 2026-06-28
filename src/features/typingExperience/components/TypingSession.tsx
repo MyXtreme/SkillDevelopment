@@ -4,9 +4,6 @@ import { useAppContext } from "../../../context/appContext";
 import { useTypingContext } from "../context/TypingContext";
 import { useTypingEngine } from "../hooks/useTypingEngine";
 
-const { app } = useAppContext();
-const { typingState } = useTypingContext();
-
 const calculatetimeTick = (time: number): string => {
   const minute: string = Math.floor(time / 60).toString();
   const second: string = Math.floor(time % 60).toString();
@@ -55,11 +52,14 @@ const spanSplittedCurrentText = (
   );
 };
 
-// const isIdle = typingState.status === "idle";
-const isRunning = typingState.status === "running";
-// const isFinished = typingState.status === "finished";
 function TypingSession() {
+  const { app } = useAppContext();
+  const { typingState } = useTypingContext();
   const { time, typedText, currentText, scrollOffset } = useTypingEngine();
+
+  // const isIdle = typingState.status === "idle";
+  const isRunning = typingState.status === "running";
+  // const isFinished = typingState.status === "finished";
   return (
     <div className="typing-wrapper">
       <div className={clsx("test-progress", { "fade-out": !isRunning })}>

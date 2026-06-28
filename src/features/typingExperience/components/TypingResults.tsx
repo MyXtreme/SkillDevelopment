@@ -1,15 +1,15 @@
 import { useAppContext } from "../../../context/appContext";
 import { useTypingContext } from "../context/TypingContext";
 
-const { app } = useAppContext();
-const { typingState, typingAction } = useTypingContext();
-
 interface TypingResultsProps {
   onRetry: () => void;
   onNext: () => void;
 }
 
 function TypingResults({ onRetry, onNext }: TypingResultsProps) {
+  const { app } = useAppContext();
+  const { typingState, typingAction } = useTypingContext();
+
   const wpm = typingState.session.summary.wpm;
   const accuracy = typingState.session.summary.accuracy;
   const raw = typingState.session.summary.raw;

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { randomTexGeneration } from "../utils/textUtils";
 import { useTypingContext } from "../context/TypingContext";
-
-const { typingState, typingAction } = useTypingContext();
+import { useAppContext } from "../../../context/appContext";
+import { randomTexGeneration } from "../utils/textUtils";
 
 export function useTypingEngine() {
+  const { app } = useAppContext();
+  const { typingState, typingAction } = useTypingContext();
   const [time, setTime] = useState<number>(typingState.config.duration);
   const [typedText, setTypedText] = useState<string>("");
   const [currentText, setCurrentText] = useState<string>(() =>
@@ -42,14 +43,20 @@ export function useTypingEngine() {
 
   const handleRetry = () => {
     typingAction.setStatus("idle");
+    setTime(typingState.config.duration);
+    setTypedText("");
   };
 
   const handleNext = () => {
     typingAction.setStatus("idle");
+    setTime(typingState.config.duration);
+    setTypedText("");
+    setCurrentText(() => randomTexGeneration());
   };
 
   const handleClickDuration = (duration: number) => {
     typingAction.setConfig({ ...typingState.config, duration });
+    setTime(typingState.config.duration);
   };
 
   useEffect(() => {
@@ -70,7 +77,9 @@ export function useTypingEngine() {
     const handlekeydown = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement) return;
       if (typingState.status === "finished" && time <= 0) return;
-      if (typingState.status === "idle") typingAction.setStatus("running");
+      if (typingState.status === "idle") {
+        typingAction.setStatus("running");
+      }
       event.preventDefault();
 
       if (event.key === "Tab") {
