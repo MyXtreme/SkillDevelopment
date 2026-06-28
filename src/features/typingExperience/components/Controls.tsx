@@ -1,57 +1,35 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { useAppContext } from "../../../context/appContext";
+import {
+  useTypingContext,
+  type TypingConfiguration,
+} from "../context/TypingContext";
 
-type ActivePanel = "none" | "duration" | "words" | "complexity";
-type Complexity = {
-  simple: boolean;
-  punctuation: boolean;
-  numbers: boolean;
-  upperCase: boolean;
-};
+const { typingState } = useTypingContext();
 
+interface TypingControlsProps {
+  onClickDuration: (duration: typeof typingState.config.duration) => void;
+  onClickContent: (content: typeof typingState.config.content) => void;
+  onClickDifficulty: (difficulty: typeof typingState.config.difficulty) => void;
+}
+
+type ActivePanel = "none" | keyof TypingConfiguration;
 const [activePanel, setActivePanel] = useState<ActivePanel>("none");
 
-export const [duration, setDuration] = useState<number>(30);
-export const [words, setWords] = useState<number>(60);
-export const [complexity, setComplexity] = useState<Complexity>({
-  simple: true,
-  punctuation: false,
-  numbers: false,
-  upperCase: false,
-});
-
-const toggleProperty = (property: keyof Complexity) => {
-  setComplexity((prevComplexity) => ({
-    ...prevComplexity,
-    [property]: !prevComplexity[property],
-  }));
-};
-
-function Controls() {
+function Controls({
+  onClickDuration,
+  onClickContent,
+  onClickDifficulty,
+}: TypingControlsProps) {
   const { app } = useAppContext();
   const immersive = app.layoutMode === "focused";
   return (
     <header className={clsx({ "fade-out": immersive })} id="header">
       <div className="panels display-panels">
-        <button
-          className={clsx({ active: activePanel === "duration" })}
-          onClick={() => setActivePanel("duration")}
-        >
-          Duration
-        </button>
-        <button
-          className={clsx({ active: activePanel === "words" })}
-          onClick={() => setActivePanel("words")}
-        >
-          Words
-        </button>
-        <button
-          className={clsx({ active: activePanel === "complexity" })}
-          onClick={() => setActivePanel("complexity")}
-        >
-          Complexity
-        </button>
+        <button onClick={() => setActivePanel("duration")}>Duration</button>
+        <button onClick={() => setActivePanel("content")}>Content</button>
+        <button onClick={() => setActivePanel("difficulty")}>Difficulty</button>
       </div>
       <div className="panels configuration-panels">
         {activePanel === "duration" && (
@@ -59,7 +37,7 @@ function Controls() {
             <button
               onClick={() => {
                 const newTime = 15;
-                setDuration(newTime);
+                onClickDuration(newTime);
               }}
             >
               15s
@@ -67,7 +45,7 @@ function Controls() {
             <button
               onClick={() => {
                 const newTime = 30;
-                setDuration(newTime);
+                onClickDuration(newTime);
               }}
             >
               30s
@@ -75,44 +53,46 @@ function Controls() {
             <button
               onClick={() => {
                 const newTime = 60;
-                setDuration(newTime);
+                onClickDuration(newTime);
               }}
             >
               60s
             </button>
           </div>
         )}
-        {activePanel === "words" && (
+        {activePanel === "content" && (
           <div className="panels configuration-panels">
-            <button
+            Coming soon
+            {/* <button
               onClick={() => {
-                const wordCount = 40;
-                setWords(wordCount);
+                const contentType = "random";
+                onClickContent(contentType);
               }}
             >
-              40
+              Random
             </button>
             <button
               onClick={() => {
-                const wordCount = 60;
-                setWords(wordCount);
+                const contentType = "quote";
+                onClickContent(contentType);
               }}
             >
-              60
+              quote
             </button>
             <button
               onClick={() => {
-                const wordCount = 80;
-                setWords(wordCount);
+                const contentType = "story";
+                onClickContent(contentType);
               }}
             >
-              80
-            </button>
+              story
+            </button> */}
           </div>
         )}
-        {activePanel === "complexity" && (
+        {activePanel === "difficulty" && (
           <div className="panels configuration-panels">
-            <button
+            Coming soon
+            {/* <button
               className={clsx({ active: complexity.punctuation })}
               onClick={() => {
                 toggleProperty("punctuation");
@@ -135,7 +115,7 @@ function Controls() {
               }}
             >
               Upper-case
-            </button>
+            </button> */}
           </div>
         )}
       </div>
