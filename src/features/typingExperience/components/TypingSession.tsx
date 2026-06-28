@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { Fragment, useState } from "react";
 import { useAppContext } from "../../../context/appContext";
 import { useTypingContext } from "../context/TypingContext";
-import { useTypingEngine } from "../hooks/useTypingEngine";
 
 const calculatetimeTick = (time: number): string => {
   const minute: string = Math.floor(time / 60).toString();
@@ -52,10 +51,21 @@ const spanSplittedCurrentText = (
   );
 };
 
-function TypingSession() {
+interface TypingSession {
+  time: number;
+  typedText: string;
+  currentText: string;
+  scrollOffset: number;
+}
+
+function TypingSession({
+  time,
+  typedText,
+  currentText,
+  scrollOffset,
+}: TypingSession) {
   const { app } = useAppContext();
   const { typingState } = useTypingContext();
-  const { time, typedText, currentText, scrollOffset } = useTypingEngine();
 
   // const isIdle = typingState.status === "idle";
   const isRunning = typingState.status === "running";

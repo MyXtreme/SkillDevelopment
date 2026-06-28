@@ -56,7 +56,7 @@ export function useTypingEngine() {
 
   const handleClickDuration = (duration: number) => {
     typingAction.setConfig({ ...typingState.config, duration });
-    setTime(typingState.config.duration);
+    setTime(duration);
   };
 
   useEffect(() => {
@@ -91,10 +91,9 @@ export function useTypingEngine() {
       } else if (event.key === "Space") {
         setTypedText((typedText) => typedText + event.key);
       } else if (event.key.length === 1) {
-        setTypedText((typedText) => typedText + event.key);
+        setTypedText((prev) => prev + event.key);
       } else return;
     };
-
     window.addEventListener("keydown", handlekeydown);
     return () => {
       window.removeEventListener("keydown", handlekeydown);
@@ -147,21 +146,29 @@ export function useTypingEngine() {
   }, [typedText]);
 
   useEffect(() => {
-    if (time === 0) {
-      typingAction.setStatus("finished");
-      action.changeLayoutMode("normal");
-      const results = {
-        ...typingState.session,
-        summary: calculateResults(
-          currentText,
-          typedText,
-          typingState.config.duration,
-        ),
-      };
-      typingAction.setSession(results);
+    if (time <= 0) {
+      setTimeout(() => {
+        const results = {
+          ...typingState.session,
+          summary: calculateResults(
+            currentText,
+            typedText,
+            typingState.config.duration,
+          ),
+        };
+        typingAction.setStatus("finished");
+        action.changeLayoutMode("normal");
+
+        typingAction.setSession(results);
+      }, 0);
     }
   }, [time]);
 
+  const splittedCurrentText: string[] = currentText.split("");
+  const splittedTypedText: string[] = typedText.split("");
+  const results: boolean[] = splittedTypedText.map<boolean>(
+    (character, index) => character === splittedCurrentText[index],
+  );
   return {
     time,
     typedText,

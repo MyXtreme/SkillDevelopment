@@ -15,12 +15,27 @@ function TypingView() {
   const isRunning = typingState.status === "running";
   const isFinished = typingState.status === "finished";
 
-  const { handleRetry, handleNext, handleClickDuration } = useTypingEngine();
+  const {
+    time,
+    typedText,
+    currentText,
+    scrollOffset,
+    handleRetry,
+    handleNext,
+    handleClickDuration,
+  } = useTypingEngine();
   const immersive = app.layoutMode === "focused";
   return (
     <main className="section" id="main">
       {!isFinished && <Controls onClickDuration={handleClickDuration} />}
-      {(isIdle || isRunning) && <TypingSession />}
+      {(isIdle || isRunning) && (
+        <TypingSession
+          time={time}
+          typedText={typedText}
+          currentText={currentText}
+          scrollOffset={scrollOffset}
+        />
+      )}
       {isFinished && (
         <TypingResults onRetry={handleRetry} onNext={handleNext} />
       )}
