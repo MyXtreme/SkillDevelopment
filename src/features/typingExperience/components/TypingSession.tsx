@@ -2,17 +2,10 @@ import clsx from "clsx";
 import { Fragment, useState } from "react";
 import { useAppContext } from "../../../context/appContext";
 import { useTypingContext } from "../context/TypingContext";
-import { randomTexGeneration } from "../utils/textUtils";
+import { useTypingEngine } from "../hooks/useTypingEngine";
 
 const { app } = useAppContext();
 const { typingState } = useTypingContext();
-
-const [time, setTime] = useState<number>(typingState.config.duration);
-const [typedText, setTypedText] = useState<string>("");
-const [currentText, setCurrentText] = useState<string>(() =>
-  randomTexGeneration(),
-);
-const [scrollOffset, setScrollOffset] = useState(0);
 
 const calculatetimeTick = (time: number): string => {
   const minute: string = Math.floor(time / 60).toString();
@@ -62,10 +55,11 @@ const spanSplittedCurrentText = (
   );
 };
 
-const isIdle = typingState.status === "idle";
+// const isIdle = typingState.status === "idle";
 const isRunning = typingState.status === "running";
-const isFinished = typingState.status === "finished";
+// const isFinished = typingState.status === "finished";
 function TypingSession() {
+  const { time, typedText, currentText, scrollOffset } = useTypingEngine();
   return (
     <div className="typing-wrapper">
       <div className={clsx("test-progress", { "fade-out": !isRunning })}>

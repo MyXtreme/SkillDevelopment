@@ -10,18 +10,14 @@ const { typingState } = useTypingContext();
 
 interface TypingControlsProps {
   onClickDuration: (duration: typeof typingState.config.duration) => void;
-  onClickContent: (content: typeof typingState.config.content) => void;
-  onClickDifficulty: (difficulty: typeof typingState.config.difficulty) => void;
+  //   onClickContent: (content: typeof typingState.config.content) => void;
+  //   onClickDifficulty: (difficulty: typeof typingState.config.difficulty) => void;
 }
 
 type ActivePanel = "none" | keyof TypingConfiguration;
 const [activePanel, setActivePanel] = useState<ActivePanel>("none");
 
-function Controls({
-  onClickDuration,
-  onClickContent,
-  onClickDifficulty,
-}: TypingControlsProps) {
+function Controls({ onClickDuration }: TypingControlsProps) {
   const { app } = useAppContext();
   const immersive = app.layoutMode === "focused";
   return (
