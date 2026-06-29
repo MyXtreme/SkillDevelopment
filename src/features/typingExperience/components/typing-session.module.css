@@ -1,0 +1,45 @@
+.typingWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.testProgress {
+  position: absolute;
+  font-size: var(--time-font-size);
+  color: var(--color-accent);
+
+  top: var(--space-md);
+  left: center;
+}
+
+.typingArea {
+  height: calc(var(--test-line-height) * var(--visible-lines));
+  max-width: 1300px;
+
+  margin-block: center;
+  overflow: hidden;
+
+  border-radius: var(--corner);
+  background-color: var(--color-bg);
+}
+
+.typingContent {
+  font-size: var(--test-font-size);
+  line-height: var(--test-line-height);
+}
+
+.idle-char {
+  color: var(--color-secondary);
+}
+
+.correct-char {
+  color: var(--color-primary);
+}
+
+.incorrect-char {
+  color: var(--color-incorrect);
+  background-color: rgba(230, 57, 70, 10%);
+  border-radius: 4px;
+}

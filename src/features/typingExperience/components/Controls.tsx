@@ -1,10 +1,9 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { useAppContext } from "../../../context/appContext";
-import {
-  useTypingContext,
-  type TypingConfiguration,
-} from "../context/TypingContext";
+import { type TypingConfiguration } from "../context/TypingContext";
+
+import controlStyles from "./controls.module.css";
 
 interface TypingControlsProps {
   onClickDuration: (duration: TypingConfiguration["duration"]) => void;
@@ -14,21 +13,30 @@ interface TypingControlsProps {
 
 function Controls({ onClickDuration }: TypingControlsProps) {
   const { app } = useAppContext();
-  const { typingState } = useTypingContext();
   const immersive = app.layoutMode === "focused";
 
   type ActivePanel = "none" | keyof TypingConfiguration;
   const [activePanel, setActivePanel] = useState<ActivePanel>("none");
   return (
     <header className={clsx("section", { "fade-out": immersive })} id="header">
-      <div className="panels display-panels">
+      <div className={clsx(controlStyles.panels, controlStyles.displayPanels)}>
         <button onClick={() => setActivePanel("duration")}>Duration</button>
         <button onClick={() => setActivePanel("content")}>Content</button>
         <button onClick={() => setActivePanel("difficulty")}>Difficulty</button>
       </div>
-      <div className="panels configuration-panels">
+      <div
+        className={clsx(
+          controlStyles.panels,
+          controlStyles.configurationPanels,
+        )}
+      >
         {activePanel === "duration" && (
-          <div className={clsx("panels configuration-panels")}>
+          <div
+            className={clsx(
+              controlStyles.panels,
+              controlStyles.configurationPanels,
+            )}
+          >
             <button
               onClick={() => {
                 const newTime = 15;
@@ -56,7 +64,12 @@ function Controls({ onClickDuration }: TypingControlsProps) {
           </div>
         )}
         {activePanel === "content" && (
-          <div className="panels configuration-panels">
+          <div
+            className={clsx(
+              controlStyles.panels,
+              controlStyles.configurationPanels,
+            )}
+          >
             Coming soon
             {/* <button
               onClick={() => {
@@ -85,7 +98,12 @@ function Controls({ onClickDuration }: TypingControlsProps) {
           </div>
         )}
         {activePanel === "difficulty" && (
-          <div className="panels configuration-panels">
+          <div
+            className={clsx(
+              controlStyles.panels,
+              controlStyles.configurationPanels,
+            )}
+          >
             Coming soon
             {/* <button
               className={clsx({ active: complexity.punctuation })}

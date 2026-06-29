@@ -1,5 +1,6 @@
 import { useAppContext } from "../../../context/appContext";
 import { useTypingContext } from "../context/TypingContext";
+import resultStyles from "./typing-results.module.css";
 
 interface TypingResultsProps {
   onRetry: () => void;
@@ -13,31 +14,35 @@ function TypingResults({ onRetry, onNext }: TypingResultsProps) {
   const wpm = typingState.session.summary.wpm;
   const accuracy = typingState.session.summary.accuracy;
   const raw = typingState.session.summary.raw;
+  const consistency = typingState.session.summary.consistency;
 
   return (
-    <div className="results-area">
-      <div className="visual">
-        <div className="placeholder1"></div>
+    <div className={resultStyles.resultsArea}>
+      <div className={resultStyles.visual}>
+        <div className={"placeholder1"}></div>
       </div>
-      <div className="results">
-        <div className="main-metrics">
-          <div className="main-unit">
+      <div className={resultStyles.results}>
+        <div className={resultStyles.mainMetrics}>
+          <div className={resultStyles.mainUnit}>
             WPM
-            <div className="main-value">{wpm} </div>
+            <div className={resultStyles.mainValue}>{wpm} </div>
           </div>
-          <div className="main-unit">
+          <div className={resultStyles.mainUnit}>
             ACC
-            <div className="main-value">{accuracy}% </div>
+            <div className={resultStyles.mainValue}>{accuracy}% </div>
           </div>
         </div>
-        <div className="secondary-metrics">
-          <div className="unit">
-            Raw speed: <div className="unit-value">{raw}</div>
+        <div className={resultStyles.secondaryMetrics}>
+          <div className={resultStyles.unit}>
+            Raw speed: <div className={resultStyles.unitValue}>{raw}</div>
           </div>
-          <div className="unit">Consistency</div>
+          <div className={resultStyles.unit}>
+            Consistency:{" "}
+            <div className={resultStyles.unitValue}>{consistency}</div>{" "}
+          </div>
         </div>
       </div>
-      <div className="action-buttons">
+      <div className={resultStyles.actionButtons}>
         <button onMouseDown={(e) => e.preventDefault()} onClick={onRetry}>
           reset
         </button>
