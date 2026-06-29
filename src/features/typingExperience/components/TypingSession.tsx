@@ -1,7 +1,9 @@
 import clsx from "clsx";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { useAppContext } from "../../../context/appContext";
 import { useTypingContext } from "../context/TypingContext";
+
+import sessionStyles from "./typing-session.module.css";
 
 const calculatetimeTick = (time: number): string => {
   const minute: string = Math.floor(time / 60).toString();
@@ -34,7 +36,9 @@ const spanSplittedCurrentText = (
         <span
           id={`${character}-${index}`}
           key={`${character}-${index}`}
-          className={getCharClassName(index, character, splittedTypedText)}
+          className={
+            sessionStyles[getCharClassName(index, character, splittedTypedText)]
+          }
         >
           {character}
         </span>
@@ -43,7 +47,9 @@ const spanSplittedCurrentText = (
       <span
         id={`${character}-${index}`}
         key={`${character}-${index}`}
-        className={getCharClassName(index, character, splittedTypedText)}
+        className={
+          sessionStyles[getCharClassName(index, character, splittedTypedText)]
+        }
       >
         {character}
       </span>
@@ -71,13 +77,15 @@ function TypingSession({
   const isRunning = typingState.status === "running";
   // const isFinished = typingState.status === "finished";
   return (
-    <div className="typing-wrapper">
-      <div className={clsx("test-progress", { "fade-out": !isRunning })}>
+    <div className={sessionStyles.typingWrapper}>
+      <div
+        className={clsx(sessionStyles.testProgress, { "fade-out": !isRunning })}
+      >
         {calculatetimeTick(time)}
       </div>
-      <div className="typing-area">
+      <div className={sessionStyles.typingArea}>
         <div
-          className="typing-content"
+          className={sessionStyles.typingContent}
           style={{ transform: `translateY(-${scrollOffset}px)` }}
         >
           {spanSplittedCurrentText(currentText, typedText)}
