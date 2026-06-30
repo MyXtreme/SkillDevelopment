@@ -1,344 +1,185 @@
-## **Project Summary** 
+# Project Vision and Technical Direction
 
-## **Project Overview** 
+This document is the current source of truth for the project. It reflects the product direction, technical architecture, and development priorities for future work.
 
-This project began as a personal learning project to improve frontend development skills while simultaneously creating a useful real-world product. 
+## Project Purpose
 
-The long-term vision is not simply a typing website, but a broader skill-development platform. However, development intentionally starts with a typing trainer because typing is a well-understood problem, has clear success metrics, and provides an excellent foundation for learning software engineering, UI/UX design, frontend architecture, product thinking, and later full-stack development. 
+MyXtype is evolving from a simple typing website into a skill-development platform. Typing is the first implemented experience, and future skills such as Reading and Memory are part of the long-term vision.
 
-The project is currently being developed using React, TypeScript, and Vite. 
+The goal is not only to measure typing performance, but to help users improve through meaningful practice, engaging experiences, and personalized feedback.
 
-## **Original Motivation** 
+## Product Direction
 
-The project originated from an interest in developing practical cognitive and productivity-related skills such as: 
+The project is intentionally focused on building a strong foundation before expanding into larger systems.
 
-- Fast touch typing 
+### Current priority
 
-- Speed reading 
+The immediate goal is to create a polished and enjoyable Typing experience that feels complete enough to be genuinely useful and worth sharing.
 
-- High-comprehension reading 
+### Guiding principles
 
-- Memory improvement 
+- Ship before expanding
+- Prioritize user experience over technical novelty
+- Build a clean foundation for future growth
+- Keep the core experience simple, focused, and intuitive
 
-- Learning efficiency 
+## Inspirations and Design Intent
 
-While researching existing tools, several observations were made: 
+The project is inspired by products that value clarity, speed, and user focus, especially in the areas of:
 
-- Existing typing sites focus primarily on speed and statistics. 
+- minimalism
+- immediate usability
+- strong visual clarity
+- customization
+- educational value
 
-- Existing learning platforms often have poor user experience. 
+The project does not aim to copy the complexity of large mature platforms. Instead, it aims to deliver a more focused and thoughtful experience.
 
-- Many typing tests use random or meaningless text. 
+## Technology Stack
 
-- Learning and typing are usually separated into different applications. 
+The project is currently built with:
 
-The idea emerged to create a system where skill development and meaningful content could coexist. 
+- React
+- TypeScript
+- Vite
 
-## **Current Product Direction** 
+## Architecture Philosophy
 
-The project currently focuses on building an excellent "Classic Typing Mode". 
+The architecture is intentionally modular and feature-oriented.
 
-The goal is not to immediately compete with mature products such as Monkeytype, Typing.com, or Typeracer. 
+### Core principles
 
-Instead, the goal is to create a polished, enjoyable, and highly usable typing experience that can serve as a foundation for future expansion. 
+- Feature-based architecture
+- Modular UI components
+- Modular CSS
+- Context API for global state
+- Custom hooks for feature-specific logic
+- Clear separation of responsibilities over large monolithic components
 
-The first public version should be something that can be proudly deployed and used by real users. 
+### State ownership
 
-1 
+Application-wide state should live in shared context when it affects the whole app, such as:
 
-## **Inspirations** 
+- current skill
+- theme
+- layout mode
+- global user preferences
 
-## **Monkeytype** 
+Typing-specific state should be owned by a dedicated typing context so that typing logic remains isolated from unrelated application concerns.
 
-Inspired by: 
+The typing engine should be separated into reusable hooks and supporting logic instead of being embedded directly inside components.
 
-- Minimalism 
+UI components should remain mostly presentational. Lifecycle, effects, and domain logic should live in hooks or dedicated modules.
 
-- Immediate usability 
+## Typing Product Direction
 
-- Fast test start 
+The project is no longer structured around traditional labels such as Classic, Race, or Story modes.
 
-- Clean user interface 
+Instead, Typing is being redesigned around user intention and experience.
 
-- Strong focus on user experience 
+### Activities
 
-- Customization options 
+The current experience model is based on activities rather than modes. Activities define why the user is typing.
 
-Not intended to replicate: 
+Current activity concepts include:
 
-- Massive settings complexity 
+- Measure
+- Practice
+- Compete
+- Explore (working name, may change later)
 
-- Extremely large feature set 
+These activities represent the user’s intent rather than simply the content being typed.
 
-## **Typing.com** 
+### Activity configuration
 
-Inspired by: 
+Configurations such as:
 
-- Educational value 
+- duration
+- word count
+- difficulty
+- punctuation
+- numbers
+- uppercase
 
-- Structured learning 
+belong to the activity definition rather than defining the activity itself.
 
-## **Typeracer** 
+This keeps the product model flexible and makes future expansion easier.
 
-Inspired by: 
+## Typing Engine
 
-- Social interaction 
+The current typing engine is structured to support a modern, extensible typing experience.
 
-- Competitive racing experience 
+### Current capabilities
 
-## **Current Development Philosophy** 
+- typing lifecycle
+- session management
+- timeline metrics
+- summary metrics
+- mistake recording
+- live WPM calculation
+- accuracy calculation
+- modular contexts
+- modular hooks
 
-Several principles guide development: 
+### Metrics and event model
 
-## **Ship Before Expanding** 
+Mistakes are stored as structured events rather than only being reduced to a final accuracy score. This allows the system to later support richer feedback, weakness analysis, and personalized recommendations.
 
-The project prioritizes completing a polished core experience before introducing large-scale features. 
+Timeline metrics are recorded over time and will become the foundation for visual graphs and progress analysis.
 
-The focus is: 
+## User Experience Philosophy
 
-- Finish • Polish • Deploy 
+The product should feel simple, focused, and immediately understandable.
 
-before: 
+The application should not overwhelm users with too many modes or settings at the start. The default experience should make sense right away.
 
-- AI 
+After a session, the product should naturally guide the user toward meaningful next actions rather than stopping at raw statistics.
 
-- Multiplayer 
+Examples of follow-up actions include:
 
-2 
+- retry
+- continue
+- practice weaknesses
+- compete
+- explore
 
-- Reading platform 
+This flow is expected to support future AI-driven personalization, but the architecture should be prepared for it even before AI is introduced.
 
-- Additional skills 
+## Current Development Priorities (Version 1)
 
-## **Learn By Building** 
+The highest priority is to stabilize and polish the core Typing experience.
 
-The project is simultaneously: 
+### Version 1 priorities
 
-- A software product 
+1. Stabilize Typing V1
+2. Finish session visualization
+3. Improve the results experience
+4. Complete activity configuration
+5. Polish UI and interactions
+6. Deploy Version 1
 
-- A software engineering learning journey 
+## Scope for Version 1
 
-- 
+The following are intentionally outside the scope of Version 1:
 
-The objective is not only to build the application but also to develop professional engineering skills through the process. 
+- AI personalization
+- backend systems
+- authentication
+- analytics infrastructure
+- cloud synchronization
+- reading platform features
+- memory platform features
 
-## **User Experience First** 
+These areas may be considered later, but only after the core typing product is stable, polished, and useful.
 
-Many implementation decisions are evaluated from the user's perspective. 
+## Long-Term Vision
 
-Questions commonly asked include: 
+Typing is the first step in a broader skill-development platform. In the future, the product may expand to additional learning experiences such as:
 
-- Is this convenient? 
+- Reading skills
+- Memory skills
+- Structured learning flows
 
-- Is this visually clear? 
+The long-term goal is to create a unified environment where users can develop practical cognitive and learning skills through meaningful practice.
 
-- Is this intuitive? 
-
-- Does this improve focus? 
-
-rather than: 
-
-- Is this technically impressive? 
-
-## **Current State of Development** 
-
-The core typing functionality is largely operational. 
-
-Implemented concepts include: 
-
-- Typing engine 
-
-- Character-by-character validation 
-
-- Timer system 
-
-- Test status management 
-
-- Results rendering 
-
-- Configurable test durations 
-
-- Custom timer input 
-
-- Text scrolling system 
-
-- Dynamic caret positioning 
-
-- Improved visual hierarchy 
-
-- Early design system foundation 
-
-The project has moved beyond basic functionality and is currently entering the polishing stage. 
-
-3 
-
-## **User Interface Direction** 
-
-The project is intentionally minimalistic. 
-
-Current visual direction draws inspiration from: 
-
-- Paper 
-
-- Books 
-
-- Vintage reading materials 
-
-- Focused environments 
-
-Example design ideas: 
-
-- Warm paper-like backgrounds 
-
-- Ink-inspired text colors 
-
-- Minimal distractions 
-
-- Strong readability 
-
-- Clean typography 
-
-The intention is to create an environment that feels calm, focused, and pleasant during long sessions. 
-
-## **Content Philosophy** 
-
-One of the most important future differentiators is content quality. 
-
-Many typing platforms use: 
-
-- Random words 
-
-- Meaningless sentences 
-
-- Artificial text collections 
-
-This project aims to eventually introduce meaningful content such as: 
-
-- Books 
-
-- Educational excerpts 
-
-- Programming content 
-
-- Science 
-
-- History 
-
-- Philosophy 
-
-- Personal development material 
-
-The idea is that users improve typing skills while simultaneously gaining knowledge. 
-
-Typing becomes a learning activity rather than a purely mechanical exercise. 
-
-## **Long-Term Product Vision** 
-
-The typing trainer is viewed as the first module of a larger ecosystem. 
-
-4 
-
-Potential future modules include: 
-
-## **Typing Skill** 
-
-The current focus. 
-
-## **Reading Skill** 
-
-Reading-focused training systems connected to the same content library. 
-
-## **Memory Skill** 
-
-Memory and retention exercises. 
-
-## **Learning Platform** 
-
-A unified environment where users develop practical cognitive skills through structured practice. 
-
-## **AI Integration Vision** 
-
-AI is not intended to be added simply because it is popular. 
-
-The intended use cases are directly connected to learning. 
-
-Potential future examples: 
-
-- Personalized typing exercises 
-
-- Adaptive lessons 
-
-- AI typing coach 
-
-- AI-generated practice material 
-
-- Conversational typing practice 
-
-- Learning-focused content generation 
-
-The goal is to use AI where it meaningfully improves the user's learning experience. 
-
-## **Multiplayer Vision** 
-
-A future multiplayer racing mode is planned. 
-
-However, the intention is not to create a simple clone of existing typing races. 
-
-One notable concept being explored: 
-
-- The caret acts as the vehicle. 
-
-- The text acts as the road. 
-
-- The road moves toward the player rather than moving a separate car. 
-
-This creates a tighter connection between typing and visual racing feedback. 
-
-5 
-
-## **Version 1 Goal** 
-
-Version 1 should include: 
-
-- Polished classic typing mode 
-
-- Responsive layout 
-
-- Themes 
-
-- Customization options 
-
-- High-quality results visualization 
-
-- Strong user experience 
-
-- Public deployment 
-
-Version 1 is intended to be useful, enjoyable, and complete enough to be proudly shared as a real product. 
-
-## **Current Strategic Focus** 
-
-The project is intentionally avoiding premature complexity. 
-
-Not current priorities: 
-
-- Authentication 
-
-- Backend systems 
-
-- Multiplayer infrastructure 
-
-- AI systems 
-
-- Reading platform 
-
-- Memory platform 
-
-Current priority: 
-
-Build the best possible version of Classic Typing Mode and ship it. 
-
-Only after that foundation is complete should additional layers of functionality be introduced. 
-
-6 
-
+If AI is introduced in the future, it should be used only where it meaningfully improves the learning experience rather than being added for novelty alone.
