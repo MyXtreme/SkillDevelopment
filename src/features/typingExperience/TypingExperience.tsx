@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { useAppContext } from "../../context/appContext";
 import { TypingProvider, useTypingContext } from "./context/TypingContext";
 import Controls from "./components/Controls";
-import TypingSession from "./components/TypingSession";
+import TypingDisplay from "./components/TypingDisplayt";
 import TypingResults from "./components/TypingResults";
 import { useTypingEngine } from "./hooks/useTypingEngine";
 
@@ -19,7 +19,6 @@ function TypingView() {
     time,
     typedText,
     currentText,
-    scrollOffset,
     handleRetry,
     handleNext,
     handleClickDuration,
@@ -29,11 +28,10 @@ function TypingView() {
     <main className="section" id="main">
       {!isFinished && <Controls onClickDuration={handleClickDuration} />}
       {(isIdle || isRunning) && (
-        <TypingSession
+        <TypingDisplay
           time={time}
           typedText={typedText}
           currentText={currentText}
-          scrollOffset={scrollOffset}
         />
       )}
       {isFinished && (

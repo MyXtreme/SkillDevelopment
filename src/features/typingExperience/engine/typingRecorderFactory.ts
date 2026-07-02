@@ -6,6 +6,7 @@ import {
   type MistakeType,
   type EndReason,
 } from "../context/TypingContext";
+import { PERFORMANCE_THRESHOLDS } from "../typingDefaults";
 
 interface ProgressSnapshot {
   metrics: Metrics;
@@ -27,6 +28,7 @@ export function calculateLiveMetrics(
       detectedMistakes: [],
     };
   }
+  const divisor = PERFORMANCE_THRESHOLDS.CPM_TO_WPM_DIVISOR;
   let correctChars = 0;
   let totalChars = typedTextSlice.length;
   const mistakes: Mistake[] = [];
@@ -62,8 +64,8 @@ export function calculateLiveMetrics(
   });
 
   const timeMin = timeMs / 60000;
-  const raw = Number((totalChars / 5 / timeMin).toFixed(1));
-  const wpm = Math.max(0, Math.floor(correctChars / 5 / timeMin));
+  const raw = Number((totalChars / divisor / timeMin).toFixed(1));
+  const wpm = Math.max(0, Math.floor(correctChars / divisor / timeMin));
   const accuracy = Number(((correctChars / totalChars) * 100).toFixed(1));
   console.log(wpm + ":" + raw + " " + accuracy);
 
@@ -81,10 +83,11 @@ export function createTypingRecorder() {
   };
 
   let startTime: number | null = null;
-  let totalTime: number | null = null;
+  let lastTickTime: number | null = null;
 
   const start = () => {
-    startTime = Date.now();
+    startTime = performance.now();
+    lastTickTime = startTime;
     timeLine.length = 0;
     mistakeLog.length = 0;
   };
@@ -93,23 +96,26 @@ export function createTypingRecorder() {
     expectedTextSlice: string,
     typedTextSlice: string,
     caretIndex: number,
-    tickTime: number = 1000,
   ) => {
+    if (startTime === null || lastTickTime === null) {
+      throw Error("typing session recording is never started");
+    }
+
+    const now = performance.now();
+    const totalElapsedTimeMs = now - startTime;
+    const deltaTimeMs = now - lastTickTime;
+    lastTickTime = now;
+
     const { metrics, detectedMistakes } = calculateLiveMetrics(
       expectedTextSlice,
       typedTextSlice,
-      tickTime,
+      deltaTimeMs,
       caretIndex,
     );
-    let elapsedTimeMs: number;
-    if (!startTime) {
-      throw Error("typing session recording is never started");
-    }
-    elapsedTimeMs = Date.now() - startTime;
 
     const timeLineSnapshot: TimeLineSnapshot = {
       timeStamp: Date.now(),
-      elapsedTimeMs,
+      elapsedTimeMs: Math.round(totalElapsedTimeMs),
       charsTyped: typedTextSlice.length,
       metrics,
     };
@@ -126,10 +132,8 @@ export function createTypingRecorder() {
   const stop = (reason: EndReason): TypingSession => {
     if (startTime === null)
       throw Error("typing session recording is never started");
-    totalTime = Date.now() - startTime;
     sessionData = {
-      ...sessionData,
-      totalTimeMs: totalTime,
+      totalTimeMs: Math.round(performance.now() - startTime),
       reason,
       timeLine,
       event: { mistakeLog },

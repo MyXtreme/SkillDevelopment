@@ -26,6 +26,7 @@
 }
 
 .typingContent {
+  padding-top: var(--test-line-height);
   font-size: var(--test-font-size);
   line-height: var(--test-line-height);
 }
