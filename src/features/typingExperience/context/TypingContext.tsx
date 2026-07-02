@@ -2,33 +2,44 @@ import { useState, useContext, createContext, type ReactNode } from "react";
 
 export type TypingActivity = "measure" | "practice" | "compete" | "explore";
 export type TypingStatus = "idle" | "running" | "finished";
+
+export type CompletionType = "timeEnd" | "textEnd";
 export type TypingConfiguration = {
   duration: number;
-  content: "random" | "story" | "quote";
+  wordRange: number;
+  completeOn: CompletionType;
   difficulty: {
     punctuation: boolean;
     numbers: boolean;
     uppercase: boolean;
   };
 };
+
+export type EndReason = CompletionType | "exit" | "force-exit";
+export interface Metrics {
+  //TODO: Implement other metrics like consistency, burst
+  wpm: number;
+  accuracy: number;
+  raw: number;
+}
+export interface TimeLineSnapshot {
+  timeStamp: number;
+  elapsedTimeMs: number;
+  charsTyped: number;
+  metrics: Metrics;
+}
+export type MistakeType = "incorrect" | "miss" | "spam" | "double-tap";
+export interface Mistake {
+  index: number;
+  type: MistakeType;
+  typedCharacter: string;
+  expectedCharacter: string;
+}
 export type TypingSession = {
-  id: number;
-  summary: {
-    wpm: number;
-    accuracy: number;
-    raw: number;
-    consistency: number;
-  };
-  timeline: {
-    wpm: number[];
-    raw: number[];
-    mistakes: number[];
-  };
-  analysis: {
-    weakWords: string[];
-    weakKeys: string[];
-    burstMoments: number[];
-  };
+  totalTimeMs: number;
+  reason: EndReason;
+  timeLine: TimeLineSnapshot[];
+  event: { mistakeLog: Mistake[] };
 };
 
 type TypingState = {
@@ -58,27 +69,15 @@ export function TypingProvider({ children }: { children: ReactNode }) {
     status: "idle",
     config: {
       duration: 30,
-      content: "random",
+      wordRange: 40,
+      completeOn: "timeEnd",
       difficulty: { punctuation: false, numbers: false, uppercase: false },
     },
     session: {
-      id: 0,
-      summary: {
-        wpm: 0,
-        accuracy: 0,
-        raw: 0,
-        consistency: 0,
-      },
-      timeline: {
-        wpm: [],
-        raw: [],
-        mistakes: [],
-      },
-      analysis: {
-        weakWords: [],
-        weakKeys: [],
-        burstMoments: [],
-      },
+      timeLine: [],
+      reason: "exit",
+      totalTimeMs: 0,
+      event: { mistakeLog: [] },
     },
   });
 

@@ -3,7 +3,7 @@ import { Fragment } from "react";
 import { useAppContext } from "../../../context/appContext";
 import { useTypingContext } from "../context/TypingContext";
 
-import sessionStyles from "./typing-session.module.css";
+import sessionStyles from "./typing-test.module.css";
 
 const calculatetimeTick = (time: number): string => {
   const minute: string = Math.floor(time / 60).toString();
@@ -57,19 +57,19 @@ const spanSplittedCurrentText = (
   );
 };
 
-interface TypingSession {
+interface TypingTest {
   time: number;
   typedText: string;
   currentText: string;
   scrollOffset: number;
 }
 
-function TypingSession({
+function TypingTest({
   time,
   typedText,
   currentText,
   scrollOffset,
-}: TypingSession) {
+}: TypingTest) {
   const { app } = useAppContext();
   const { typingState } = useTypingContext();
 
@@ -95,4 +95,4 @@ function TypingSession({
   );
 }
 
-export default TypingSession;
+export default TypingTest;

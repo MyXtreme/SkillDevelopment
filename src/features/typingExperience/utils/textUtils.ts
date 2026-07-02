@@ -1,9 +1,6 @@
 import commonWords from "../../../data/commonWordsEng";
-
-export function randomTexGeneration(
-  source: string[] = commonWords,
-  wordRange = 40,
-): string {
+const source: string[] = commonWords;
+export function randomTexGeneration(wordRange = 40): string {
   const dataset: string[] = source;
 
   let index: number;
