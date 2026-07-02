@@ -1,4 +1,5 @@
 import { useState, useContext, createContext, type ReactNode } from "react";
+import { DEFAULT_TYPING_CONFIG } from "../typingDefaults";
 
 export type TypingActivity = "measure" | "practice" | "compete" | "explore";
 export type TypingStatus = "idle" | "running" | "finished";
@@ -69,7 +70,7 @@ export function TypingProvider({ children }: { children: ReactNode }) {
     status: "idle",
     config: {
       duration: 30,
-      wordRange: 40,
+      wordRange: 25,
       completeOn: "timeEnd",
       difficulty: { punctuation: false, numbers: false, uppercase: false },
     },
