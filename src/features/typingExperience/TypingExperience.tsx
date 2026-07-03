@@ -3,9 +3,9 @@ import clsx from "clsx";
 import { useAppContext } from "../../context/appContext";
 import { TypingProvider, useTypingContext } from "./context/TypingContext";
 import Controls from "./components/Controls";
-import TypingDisplay from "./components/TypingDisplayt";
+import TypingDisplay from "./components/TypingDisplay";
 import TypingResults from "./components/TypingResults";
-import { useTypingEngine } from "./hooks/useTypingEngine";
+import { useTypingLifecycle } from "./engine/useTypingLifecycle";
 
 function TypingView() {
   const { app } = useAppContext();
@@ -16,22 +16,26 @@ function TypingView() {
   const isFinished = typingState.status === "finished";
 
   const {
-    time,
-    typedText,
-    currentText,
+    ui,
     handleRetry,
     handleNext,
     handleClickDuration,
-  } = useTypingEngine();
+    handleClickWordRange,
+  } = useTypingLifecycle();
   const immersive = app.layoutMode === "focused";
   return (
     <main className="section" id="main">
-      {!isFinished && <Controls onClickDuration={handleClickDuration} />}
+      {!isFinished && (
+        <Controls
+          onClickDuration={handleClickDuration}
+          onClickWordRange={handleClickWordRange}
+        />
+      )}
       {(isIdle || isRunning) && (
         <TypingDisplay
-          time={time}
-          typedText={typedText}
-          currentText={currentText}
+          time={ui.time}
+          typedText={ui.typedText}
+          currentText={ui.currentText}
         />
       )}
       {isFinished && (

@@ -4,7 +4,7 @@ import { useAutoScroll } from "../hooks/useAutoScroll";
 import { formatTimeTick } from "../utils/timeUtils";
 import { generateTextTokens } from "../utils/textHighlighter";
 
-import typingDisplayStyles from "./typing-test.module.css";
+import typingDisplayStyles from "./typing-display.module.css";
 import { Fragment } from "react/jsx-runtime";
 
 interface TypingDisplay {
@@ -43,7 +43,7 @@ export default function TypingDisplay({
               {token.isCaretBefore && <span className="caretIndicator">|</span>}
               <span
                 ref={setSpanRef(index)}
-                className={typingDisplayStyles[token.classNameKay]}
+                className={typingDisplayStyles[token.classNameKey]}
               >
                 {token.char}
               </span>
