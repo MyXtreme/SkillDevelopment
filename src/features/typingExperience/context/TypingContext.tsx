@@ -75,7 +75,18 @@ export function TypingProvider({ children }: { children: ReactNode }) {
       difficulty: { punctuation: false, numbers: false, uppercase: false },
     },
     session: {
-      timeLine: [],
+      timeLine: [
+        {
+          timeStamp: 0,
+          elapsedTimeMs: 0,
+          charsTyped: 0,
+          metrics: {
+            wpm: 0,
+            raw: 0,
+            accuracy: 0,
+          },
+        },
+      ],
       reason: "exit",
       totalTimeMs: 0,
       event: { mistakeLog: [] },

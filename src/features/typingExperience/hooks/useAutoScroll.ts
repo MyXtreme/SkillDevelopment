@@ -32,9 +32,8 @@ export function useAutoScroll(typedTextLength: number, fontSize: number = 64) {
     };
     const currentLineIndex = getLineIndex(currentCharSpan);
     const isLineChanged = currentLineIndex !== getLineIndex(prevCharSpan);
-    if (currentLineIndex === 1) return;
     if (isLineChanged) {
-      setScrollOffset(Math.max(0, (currentLineIndex - 1) * lineHeight));
+      setScrollOffset(Math.max(0, currentLineIndex * lineHeight));
     }
   }, [typedTextLength, fontSize]);
 

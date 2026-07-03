@@ -1,6 +1,6 @@
 interface TokenConfig {
   char: string;
-  classNameKay: "idleChar" | "correct" | "incorrect";
+  classNameKey: "idleChar" | "correctChar" | "incorrectChar";
   isCaretBefore: boolean;
 }
 
@@ -12,15 +12,16 @@ export function generateTextTokens(
   const charsTyped: number = typedText.length;
 
   return expectedChars.map((char, index) => {
-    let classNameKay: TokenConfig["classNameKay"] = "idleChar";
+    let classNameKey: TokenConfig["classNameKey"] = "idleChar";
 
     if (index < charsTyped) {
-      classNameKay = char === typedText[index] ? "correct" : "incorrect";
+      classNameKey =
+        char === typedText[index] ? "correctChar" : "incorrectChar";
     }
 
     return {
       char,
-      classNameKay,
+      classNameKey,
       isCaretBefore: index === charsTyped,
     };
   });

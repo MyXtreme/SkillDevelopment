@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { useAppContext } from "../context/appContext";
 
 interface InputManagerOptions {
   onInputReceive: (key: string, isShortcut: boolean) => void;
@@ -8,17 +7,23 @@ interface InputManagerOptions {
 export default function useInputManager({
   onInputReceive,
 }: InputManagerOptions) {
+  const savedHandler = useRef(onInputReceive);
+  useEffect(() => {
+    savedHandler.current = onInputReceive;
+  }, [onInputReceive]);
   useWindowListener("keydown", (event) => {
+    //TODO: Add proper shortcut handler
+    if (["Shift", "Control", "Alt", "Meta"].includes(event.key)) return;
     if (event.ctrlKey || event.altKey || event.metaKey) return;
 
     const key = event.key;
-    const isShortcut = key.length > 0 && key !== " " && key !== "Backspace";
+    const isShortcut = key.length > 1 && key !== " " && key !== "Backspace";
 
     if (key === " " || key === "Backspace" || key === "Tab") {
       event.preventDefault();
     }
 
-    onInputReceive(key, isShortcut);
+    savedHandler.current(key, isShortcut);
   });
 }
 
