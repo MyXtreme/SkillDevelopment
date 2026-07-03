@@ -26,19 +26,20 @@
 }
 
 .typingContent {
+  padding-top: var(--test-line-height);
   font-size: var(--test-font-size);
   line-height: var(--test-line-height);
 }
 
-.idle-char {
+.idleChar {
   color: var(--color-secondary);
 }
 
-.correct-char {
+.correctChar {
   color: var(--color-primary);
 }
 
-.incorrect-char {
+.incorrectChar {
   color: var(--color-incorrect);
   background-color: rgba(230, 57, 70, 10%);
   border-radius: 4px;

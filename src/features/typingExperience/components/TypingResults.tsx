@@ -11,11 +11,19 @@ function TypingResults({ onRetry, onNext }: TypingResultsProps) {
   const { app } = useAppContext();
   const { typingState, typingAction } = useTypingContext();
 
-  const wpm = typingState.session.summary.wpm;
-  const accuracy = typingState.session.summary.accuracy;
-  const raw = typingState.session.summary.raw;
-  const consistency = typingState.session.summary.consistency;
+  const snapshot = typingState.session.timeLine.at(-1);
+  //TODO: Implement average value of array or other proper delivery of summary
+  if (!snapshot)
+    throw Error(
+      "the session data is undefined, unable to render results from undefined",
+    );
+  const wpm = snapshot.metrics.wpm;
+  const accuracy = snapshot.metrics.accuracy;
+  const raw = snapshot.metrics.raw;
 
+  const consistency = 0;
+
+  //TODO: Implement visual graph building with chart.js library.
   return (
     <div className={resultStyles.resultsArea}>
       <div className={resultStyles.visual}>

@@ -7,11 +7,11 @@ import controlStyles from "./controls.module.css";
 
 interface TypingControlsProps {
   onClickDuration: (duration: TypingConfiguration["duration"]) => void;
-  //   onClickContent: (content: TypingConfiguration["content"]) => void;
+  onClickWordRange: (content: TypingConfiguration["wordRange"]) => void;
   //   onClickDifficulty: (difficulty: TypingConfiguration["difficulty"]) => void;
 }
 
-function Controls({ onClickDuration }: TypingControlsProps) {
+function Controls({ onClickDuration, onClickWordRange }: TypingControlsProps) {
   const { app } = useAppContext();
   const immersive = app.layoutMode === "focused";
 
@@ -21,7 +21,7 @@ function Controls({ onClickDuration }: TypingControlsProps) {
     <header className={clsx("section", { "fade-out": immersive })} id="header">
       <div className={clsx(controlStyles.panels, controlStyles.displayPanels)}>
         <button onClick={() => setActivePanel("duration")}>Duration</button>
-        <button onClick={() => setActivePanel("content")}>Content</button>
+        <button onClick={() => setActivePanel("wordRange")}>Words</button>
         <button onClick={() => setActivePanel("difficulty")}>Difficulty</button>
       </div>
       <div
@@ -63,38 +63,34 @@ function Controls({ onClickDuration }: TypingControlsProps) {
             </button>
           </div>
         )}
-        {activePanel === "content" && (
+        {activePanel === "wordRange" && (
           <div
             className={clsx(
               controlStyles.panels,
               controlStyles.configurationPanels,
             )}
           >
-            Coming soon
-            {/* <button
+            <button
               onClick={() => {
-                const contentType = "random";
-                onClickContent(contentType);
+                onClickWordRange(25);
               }}
             >
-              Random
+              25
             </button>
             <button
               onClick={() => {
-                const contentType = "quote";
-                onClickContent(contentType);
+                onClickWordRange(50);
               }}
             >
-              quote
+              50
             </button>
             <button
               onClick={() => {
-                const contentType = "story";
-                onClickContent(contentType);
+                onClickWordRange(100);
               }}
             >
-              story
-            </button> */}
+              100
+            </button>
           </div>
         )}
         {activePanel === "difficulty" && (
