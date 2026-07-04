@@ -25,26 +25,29 @@ export function useTypingLifecycle() {
         ? typingState.config.wordRange
         : currentText.length,
   });
-  const typedText = useRef("");
+  const [typedText, setTypedText] = useState("");
   const typedDelta = useRef("");
   const [time, setTime] = useState(0);
   const intervalID = useRef<number | null>(null);
 
-  const [renderNonce, setRenderNonce] = useState<number>(0);
-
+  const textRef = useRef({
+    typedTextLength: typedText.length,
+    currentTextLength: currentText.length,
+    typedDelta: typedDelta,
+  });
   //====================== Handlers =========================//
   const handleRetry = () => {
     typingAction.setStatus("idle");
     action.changeLayoutMode("normal");
     setTime(0);
-    typedText.current = "";
+    setTypedText("");
   };
 
   const handleNext = () => {
     typingAction.setStatus("idle");
     action.changeLayoutMode("normal");
     setTime(0);
-    typedText.current = "";
+    setTypedText("");
     setCurrentText(() => randomTexGeneration());
   };
 
@@ -71,6 +74,13 @@ export function useTypingLifecycle() {
       currentTextLength: currentText.length,
     };
   }, [typingState.config, currentText.length]);
+  useEffect(() => {
+    textRef.current = {
+      typedTextLength: typedText.length,
+      currentTextLength: currentText.length,
+      typedDelta: typedDelta,
+    };
+  }, [typedText.length, currentText.length, typedDelta]);
 
   // ======================= Input ====================== //
   const liveSyncRef = useRef({
@@ -111,33 +121,32 @@ export function useTypingLifecycle() {
         typingAction.setStatus("running");
         setTestFinished(false);
         if (key === "Backspace") {
-          typedText.current = typedText.current.slice(0, -1);
+          setTypedText((prev) => prev.slice(0, -1));
           typedDelta.current = typedDelta.current.slice(0, -1);
         } else {
           const charToAppend = key === " " || key === "Spacebar" ? " " : key;
-          typedText.current += charToAppend;
+          setTypedText((prev) => prev + charToAppend);
           typedDelta.current += charToAppend;
         }
       }
 
       if (engineStatus === "running") {
         if (key === "Backspace") {
-          typedText.current = typedText.current.slice(0, -1);
+          setTypedText((prev) => prev.slice(0, -1));
           typedDelta.current = typedDelta.current.slice(0, -1);
         } else if (key.length === 1 || key === " ") {
           const charToAppend = key === " " || key === "Spacebar" ? " " : key;
-          typedText.current += charToAppend;
+          setTypedText((prev) => prev + charToAppend);
           typedDelta.current += charToAppend;
         }
         if (key.length > 1) {
           //TODO before there all shortcuts should be handled
           return;
         }
-        setRenderNonce((prev) => prev + 1);
 
         if (
           typingState.config.completeOn === "textEnd" &&
-          typedText.current.length >= currentText.length
+          typedText.length >= currentText.length
         ) {
           setTestFinished(true);
         }
@@ -167,13 +176,13 @@ export function useTypingLifecycle() {
     action.changeLayoutMode("focused");
 
     intervalID.current = window.setInterval(() => {
+      const { currentTextLength, typedTextLength, typedDelta } =
+        textRef.current;
       setTime((prev) => prev + 1);
-
-      const caretIndex = typedText.current.length;
+      const caretIndex = typedTextLength;
       const deltaLength = typedDelta.current.length;
       const deltaStart = Math.max(caretIndex - deltaLength);
       const expectedTextSlice = currentText.slice(deltaStart, caretIndex);
-
       sessionRecord.current.tick(
         expectedTextSlice,
         typedDelta.current,
@@ -195,13 +204,10 @@ export function useTypingLifecycle() {
     if (completeOn === "timeEnd" && time >= duration) {
       setTestFinished(true);
     }
-    if (
-      completeOn === "textEnd" &&
-      typedText.current.length >= currentTextLength
-    ) {
+    if (completeOn === "textEnd" && typedText.length >= currentTextLength) {
       setTestFinished(true);
     }
-  }, [time, typedText.current.length]);
+  }, [time, typedText.length]);
 
   useEffect(() => {
     if (!testFinished || engineStatus !== "running") return;
@@ -224,7 +230,7 @@ export function useTypingLifecycle() {
     if (completeOn !== "timeEnd") return;
 
     const totalLength = currentText.length;
-    const typedLength = typedText.current.length;
+    const typedLength = typedText.length;
     const charactersRemaining = totalLength - typedLength;
 
     if (
@@ -233,10 +239,10 @@ export function useTypingLifecycle() {
       const extraText = randomTexGeneration();
       setCurrentText((prev) => prev + extraText);
     }
-  }, [typedText.current.length, currentText, engineStatus]);
+  }, [typedText.length, currentText, engineStatus]);
 
   const ui = {
-    typedText: typedText.current,
+    typedText: typedText,
     currentText: currentText,
     time: time,
   };
