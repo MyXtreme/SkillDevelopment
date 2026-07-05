@@ -24,12 +24,14 @@
   --space-xxl: 64px;
   --space-3xl: 80px;
 
-  --corner: 12px;
+  --corner-lg: 12px;
+  --corner-md: 8px;
+  --corner-sm: 4px;
 
   /* Theme template: 
     --color-bg: value;
     --color-primary: value;         <- main colour for text or element
-    --color-secondary: value;       <- main colours faded version
+    --color-secondary: value;       <- main colours for secondary or muted elements
     --color-accent: value;          <- hight contrast colour
   
   */

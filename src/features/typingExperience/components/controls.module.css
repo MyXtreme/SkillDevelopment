@@ -1,22 +1,78 @@
+.configControls {
+  display: flex;
+  flex-direction: row;
+
+  gap: var(--space-xl);
+  align-items: center;
+  justify-content: center;
+
+  height: var(--header-height);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-md, 1rem);
+}
+
 .panels {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  font-size: 1.5rem;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
 
-  border-radius: var(--corner);
-  background-color: var(--color-bg);
+  font-size: 0.875rem;
+  font-weight: 700;
+
+  border-radius: var(--corner-md);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 4%, var(--color-bg));
+  background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
+
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: border-color 0.3s ease;
 }
+
+.panels:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
+}
+
+.panels button,
+.panels .controlItems {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.375rem, 0.75rem;
+  border-radius: var(--corner-sm);
+
+  color: var(--color-secondary);
+  white-space: nowrap;
+
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.panels button:hover,
+.panels .control-items:hover {
+  color: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+.panels button:active {
+  transform: scale(0.97);
+}
+
+.panels .activePanel {
+  color: var(--color-accent) !important;
+  font-weight: 600;
+
+  background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);
+}
+
 .displayPanels {
 }
-
 .configurationPanels {
 }
-
-/*.display-panels > button:hover,
-.configuration-panels > button:hover {
-  cursor: pointer;
-  color: var(--color-accent);
-}*/
