@@ -7,6 +7,11 @@ export const PERFORMANCE_THRESHOLDS = {
   LOOP_TICK_INTERVAL_MS: 1000,
 };
 
+export const MEASURE_CONFIG_OPTIONS = {
+  DURATION_OPTIONS: [15, 30, 60],
+  WORD_RANGE_OPTIONS: [25, 50, 100],
+};
+
 export const DEFAULT_TYPING_CONFIG: TypingConfiguration = {
   duration: 30,
   wordRange: 25,
