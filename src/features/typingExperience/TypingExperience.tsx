@@ -21,6 +21,7 @@ function TypingView() {
     handleNext,
     handleClickDuration,
     handleClickWordRange,
+    handleClickDifficulty,
   } = useTypingLifecycle();
   const immersive = app.layoutMode === "focused";
   return (
@@ -29,6 +30,7 @@ function TypingView() {
         <Controls
           onClickDuration={handleClickDuration}
           onClickWordRange={handleClickWordRange}
+          onClickDifficulty={handleClickDifficulty}
         />
       )}
       {(isIdle || isRunning) && (

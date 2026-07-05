@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTypingContext } from "../context/TypingContext";
+import {
+  useTypingContext,
+  type TypingConfiguration,
+} from "../context/TypingContext";
 import { PERFORMANCE_THRESHOLDS } from "../typingDefaults";
 import { randomTexGeneration } from "../utils/textGenerationUtils";
 import { createTypingRecorder } from "./typingRecorderFactory";
@@ -11,20 +14,30 @@ export function useTypingLifecycle() {
   const { typingState, typingAction } = useTypingContext();
   const engineStatus = typingState.status;
   const [testFinished, setTestFinished] = useState<boolean>(false);
+  const configRef = useRef<TypingConfiguration>({
+    completeOn: typingState.config.completeOn,
+    duration: typingState.config.duration,
+    wordRange: typingState.config.wordRange,
+    difficulty: {
+      numbers: typingState.config.difficulty.numbers,
+      punctuation: typingState.config.difficulty.punctuation,
+      uppercase: typingState.config.difficulty.uppercase,
+    },
+  });
 
   const [currentText, setCurrentText] = useState<string>(() =>
-    randomTexGeneration(typingState.config.wordRange),
+    randomTexGeneration(
+      configRef.current.difficulty.numbers,
+      configRef.current.difficulty.punctuation,
+      configRef.current.difficulty.uppercase,
+      typingState.config.completeOn === "textEnd"
+        ? typingState.config.wordRange
+        : null,
+    ),
   );
 
   const sessionRecord = useRef(createTypingRecorder());
-  const configRef = useRef({
-    completeOn: typingState.config.completeOn,
-    duration: typingState.config.duration,
-    currentTextLength:
-      typingState.config.wordRange > 0
-        ? typingState.config.wordRange
-        : currentText.length,
-  });
+
   const [typedText, setTypedText] = useState("");
   const typedDelta = useRef("");
   const [time, setTime] = useState(0);
@@ -48,7 +61,16 @@ export function useTypingLifecycle() {
     action.changeLayoutMode("normal");
     setTime(0);
     setTypedText("");
-    setCurrentText(() => randomTexGeneration());
+    setCurrentText(() =>
+      randomTexGeneration(
+        configRef.current.difficulty.numbers,
+        configRef.current.difficulty.punctuation,
+        configRef.current.difficulty.uppercase,
+        typingState.config.completeOn === "textEnd"
+          ? typingState.config.wordRange
+          : null,
+      ),
+    );
   };
 
   const handleClickDuration = (duration: number) => {
@@ -67,13 +89,35 @@ export function useTypingLifecycle() {
     });
   };
 
+  const handleClickDifficulty = ({
+    numbers,
+    punctuation,
+    uppercase,
+  }: TypingConfiguration["difficulty"]) => {
+    console.log(numbers, punctuation, uppercase);
+    typingAction.setConfig({
+      ...typingState.config,
+      difficulty: {
+        numbers,
+        punctuation,
+        uppercase,
+      },
+    });
+  };
+
+  //update mutable ref values
   useEffect(() => {
     configRef.current = {
       completeOn: typingState.config.completeOn,
       duration: typingState.config.duration,
-      currentTextLength: currentText.length,
+      wordRange: typingState.config.wordRange,
+      difficulty: {
+        numbers: typingState.config.difficulty.numbers,
+        punctuation: typingState.config.difficulty.punctuation,
+        uppercase: typingState.config.difficulty.uppercase,
+      },
     };
-  }, [typingState.config, currentText.length]);
+  }, [typingState.config]);
   useEffect(() => {
     textRef.current = {
       typedTextLength: typedText.length,
@@ -83,26 +127,6 @@ export function useTypingLifecycle() {
   }, [typedText.length, currentText.length, typedDelta]);
 
   // ======================= Input ====================== //
-  const liveSyncRef = useRef({
-    status: engineStatus,
-    completeOn: typingState.config.completeOn,
-    textLength: currentText.length,
-    testFinished: testFinished,
-  });
-
-  useEffect(() => {
-    liveSyncRef.current = {
-      status: engineStatus,
-      completeOn: typingState.config.completeOn,
-      textLength: currentText.length,
-      testFinished: testFinished,
-    };
-  }, [
-    engineStatus,
-    typingState.config.completeOn,
-    currentText.length,
-    testFinished,
-  ]);
   const handleIncomingInput = useCallback(
     (key: string, isShortcut: boolean) => {
       //if(terminate) return;
@@ -162,7 +186,9 @@ export function useTypingLifecycle() {
       engineStatus,
       typingAction,
       typingState.config.completeOn,
+      typedText.length,
       currentText.length,
+      typedDelta.current,
     ],
   );
 
@@ -176,8 +202,7 @@ export function useTypingLifecycle() {
     action.changeLayoutMode("focused");
 
     intervalID.current = window.setInterval(() => {
-      const { currentTextLength, typedTextLength, typedDelta } =
-        textRef.current;
+      const { typedTextLength, typedDelta } = textRef.current;
       setTime((prev) => prev + 1);
       const caretIndex = typedTextLength;
       const deltaLength = typedDelta.current.length;
@@ -200,7 +225,8 @@ export function useTypingLifecycle() {
   }, [engineStatus]);
 
   useEffect(() => {
-    const { completeOn, duration, currentTextLength } = configRef.current;
+    const { completeOn, duration } = configRef.current;
+    const { currentTextLength } = textRef.current;
     if (completeOn === "timeEnd" && time >= duration) {
       setTestFinished(true);
     }
@@ -224,6 +250,23 @@ export function useTypingLifecycle() {
 
   // =================== TextRunning ================= //
   useEffect(() => {
+    if (engineStatus === "running") return;
+    setCurrentText(
+      randomTexGeneration(
+        typingState.config.difficulty.numbers,
+        typingState.config.difficulty.punctuation,
+        typingState.config.difficulty.uppercase,
+        typingState.config.completeOn === "textEnd"
+          ? typingState.config.wordRange
+          : null,
+      ),
+    );
+  }, [
+    typingState.config.difficulty.numbers,
+    typingState.config.difficulty.punctuation,
+    typingState.config.difficulty.uppercase,
+  ]);
+  useEffect(() => {
     if (engineStatus !== "running") return;
 
     const { completeOn } = configRef.current;
@@ -236,12 +279,17 @@ export function useTypingLifecycle() {
     if (
       charactersRemaining <= PERFORMANCE_THRESHOLDS.REMAINING_BUFFER_THRESHOLD
     ) {
-      const extraText = randomTexGeneration();
+      const extraText = randomTexGeneration(
+        configRef.current.difficulty.numbers,
+        configRef.current.difficulty.punctuation,
+        configRef.current.difficulty.uppercase,
+      );
       setCurrentText((prev) => prev + extraText);
     }
   }, [typedText.length, currentText, engineStatus]);
 
   const ui = {
+    config: configRef.current,
     typedText: typedText,
     currentText: currentText,
     time: time,
@@ -253,5 +301,6 @@ export function useTypingLifecycle() {
     handleNext,
     handleClickDuration,
     handleClickWordRange,
+    handleClickDifficulty,
   };
 }

@@ -1,4 +1,5 @@
-const commonWords:string[] = ['a', 'abandon', 'ability', 'able', 'abortion', 'about', 'above', 'abroad', 'absence', 'absolute', 'absolutely', 'absorb', 'abuse', 'academic', 'accept', 'access', 'accident', 'accompany', 'accomplish', 'according', 
+/* prettier-ignore */
+export const COMMON_WORDS:string[] = ['a', 'abandon', 'ability', 'able', 'abortion', 'about', 'above', 'abroad', 'absence', 'absolute', 'absolutely', 'absorb', 'abuse', 'academic', 'accept', 'access', 'accident', 'accompany', 'accomplish', 'according', 
 'account', 'accurate', 'accuse', 'achieve', 'achievement', 'acid', 'acknowledge', 'acquire', 'across', 'act', 'action', 'active', 'activist', 'activity', 'actor', 'actress', 'actual', 'actually', 'ad', 'adapt', 
 'add', 'addition', 'additional', 'address', 'adequate', 'adjust', 'adjustment', 'administration', 'administrator', 'admire', 'admission', 'admit', 'adolescent', 'adopt', 'adult', 'advance', 'advanced', 'advantage', 'adventure', 'advertising', 
 'advice', 'advise', 'adviser', 'advocate', 'affair', 'affect', 'afford', 'afraid', 'African', 'African-American', 'after', 'afternoon', 'again', 'against', 'age', 'agency', 'agenda', 'agent', 'aggressive', 'ago', 
@@ -148,11 +149,3 @@ const commonWords:string[] = ['a', 'abandon', 'ability', 'able', 'abortion', 'ab
 'wife', 'wild', 'will', 'willing', 'win', 'wind', 'window', 'wine', 'wing', 'winner', 'winter', 'wipe', 'wire', 'wisdom', 'wise', 'wish', 'with', 'withdraw', 'within', 'without', 
 'witness', 'woman', 'wonder', 'wonderful', 'wood', 'wooden', 'word', 'work', 'worker', 'working', 'works', 'workshop', 'world', 'worried', 'worry', 'worth', 'would', 'wound', 'wrap', 'write', 
 'writer', 'writing', 'wrong', 'yard', 'yeah', 'year', 'yell', 'yellow', 'yes', 'yesterday', 'yet', 'yield', 'you', 'young', 'your', 'yours', 'yourself', 'youth', 'zone'];
-
-export default commonWords;
-/*const texts = [
-    "The quick brown fox jumps over the lazy dog. JavaScript is fun but tricky. Typing fast need a lot of practice. My past holds power only when I give it a future.",
-    "How to do several things simultaneusly? In fact there is no simultaneusly finishing multiple job. You can organize and finish one-by-one very fast.",
-    'On a cool, clear day in late September, I went out for my final cup of tea. There was a place I liked downtown. Yemeni. The girls who worked there wore sleek headscarves printed with bright, abstracted patterns. Sunny spirals that went on for years. Handing them my last ten dollars, I took my tea out for a walk beneath the elms. Joggers raced their dogs into the evening gloom, in a park-turned-arboretum that I remembered from my college days. Tracing the path back to a familiar bench I slung my backpack down and sat. I poured my tea into a thermos, and the scents of cardamom and cinnamon mixed up with the rich humus of fall. Hours drifted by. As night fell, I started counting. Eight oclock, then nine. I split seconds like Id once split hairs, when I was young and thought that money mattered, thought that my own, personal attention was the worlds most important thing.'
-
-];*/

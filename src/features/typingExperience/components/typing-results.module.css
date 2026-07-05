@@ -4,7 +4,7 @@
   flex-direction: column;
   justify-content: center;
 
-  border-radius: var(--corner);
+  border-radius: var(--corner-lg);
   gap: 1rem;
   margin-block: var(--space-lg);
 

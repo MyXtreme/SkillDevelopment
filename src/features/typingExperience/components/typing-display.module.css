@@ -21,7 +21,7 @@
   margin-block: center;
   overflow: hidden;
 
-  border-radius: var(--corner);
+  border-radius: var(--corner-lg);
   background-color: var(--color-bg);
 }
 

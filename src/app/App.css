@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg);
+  color: var(--color-primary);
   gap: var(--space-sm);
 }
 
@@ -20,16 +21,6 @@
   justify-content: space-between;
 
   height: var(--nav-height);
-}
-
-#header {
-  flex-direction: row;
-
-  gap: var(--space-md);
-  align-items: center;
-  justify-content: center;
-
-  height: var(--header-height);
 }
 
 #main {
@@ -68,14 +59,14 @@
 .placeholder1 {
   width: 3rem;
   height: 3rem;
-  border-radius: var(--corner);
+  border-radius: var(--corner-lg);
   border: var(--color-primary) 2px solid;
 }
 
 .placeholder2 {
   width: 7.5rem;
   height: 2.5rem;
-  border-radius: var(--corner);
+  border-radius: var(--corner-lg);
   border: var(--color-primary) 2px solid;
 }
 
