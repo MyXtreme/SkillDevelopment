@@ -6,21 +6,11 @@ import { type TypingConfiguration } from "../context/TypingContext";
 import { MEASURE_CONFIG_OPTIONS } from "../typingDefaults";
 
 import controlStyles from "./controls.module.css";
+import { useTypingConfig } from "../hooks/useTypingConfig";
 
-interface TypingControlsProps {
-  onClickDuration: (duration: TypingConfiguration["duration"]) => void;
-  onClickWordRange: (content: TypingConfiguration["wordRange"]) => void;
-  onClickDifficulty: (difficulty: TypingConfiguration["difficulty"]) => void;
-}
-
-function Controls({
-  onClickDuration,
-  onClickWordRange,
-  onClickDifficulty,
-}: TypingControlsProps) {
+function Controls() {
   const { app } = useAppContext();
-  const { typingState } = useTypingContext();
-  const config = typingState.config;
+  const { config, configAction } = useTypingConfig();
   const immersive = app.layoutMode === "focused";
 
   type ActivePanel = "none" | keyof TypingConfiguration;
@@ -83,7 +73,7 @@ function Controls({
                   config.duration === time,
                   controlStyles.configurationPanels,
                 )}
-                onClick={() => onClickDuration(time)}
+                onClick={() => configAction.setDuration(time)}
               >
                 {time}
               </button>
@@ -102,7 +92,7 @@ function Controls({
                   config.wordRange === range,
                   controlStyles.configurationPanels,
                 )}
-                onClick={() => onClickWordRange(range)}
+                onClick={() => configAction.setWordRange(range)}
               >
                 {range}
               </button>
@@ -123,7 +113,10 @@ function Controls({
                   { [controlStyles.activePanel]: isActive },
                 )}
                 onClick={() =>
-                  onClickDifficulty({ ...config.difficulty, [key]: !isActive })
+                  configAction.setDifficulty({
+                    ...config.difficulty,
+                    [key]: !isActive,
+                  })
                 }
               >
                 {key}

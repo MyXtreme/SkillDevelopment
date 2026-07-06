@@ -1,36 +1,34 @@
 import {
   type TimeLineSnapshot,
-  type Metrics,
   type TypingSession,
   type Mistake,
   type MistakeType,
   type EndReason,
+  type TypingConfiguration,
+  type TypingSessionHeader,
+  type KeyStroke,
 } from "../context/TypingContext";
-import { PERFORMANCE_THRESHOLDS } from "../typingDefaults";
+import { DEFAULT_TYPING_SESSION } from "../typingDefaults";
 
 interface ProgressSnapshot {
-  metrics: Metrics;
   detectedMistakes: Mistake[];
+  totalChars: number;
+  correctChars: number;
 }
-export function calculateLiveMetrics(
+export function evaluateText(
   expectedTextSlice: string,
   typedTextSlice: string,
-  timeMs: number,
   indexOnText: number,
 ): ProgressSnapshot {
-  if (
-    expectedTextSlice.length === 0 ||
-    typedTextSlice.length === 0 ||
-    timeMs === 0
-  ) {
+  if (expectedTextSlice.length === 0 || typedTextSlice.length === 0) {
     return {
-      metrics: { accuracy: 100, wpm: 0, raw: 0 },
       detectedMistakes: [],
+      totalChars: 0,
+      correctChars: 0,
     };
   }
-  const divisor = PERFORMANCE_THRESHOLDS.CPM_TO_WPM_DIVISOR;
   let correctChars = 0;
-  let totalChars = typedTextSlice.length;
+  const totalChars = typedTextSlice.length;
   const mistakes: Mistake[] = [];
 
   const splittedCurrentText: string[] = expectedTextSlice.split("");
@@ -63,33 +61,46 @@ export function calculateLiveMetrics(
     }
   });
 
-  const timeMin = timeMs / 60000;
-  const raw = Number((totalChars / divisor / timeMin).toFixed(1));
-  const wpm = Math.max(0, Math.floor(correctChars / divisor / timeMin));
-  const accuracy = Number(((correctChars / totalChars) * 100).toFixed(1));
-  console.log(wpm + ":" + raw + " " + accuracy);
-
-  return { metrics: { raw, wpm, accuracy }, detectedMistakes: mistakes };
+  return { detectedMistakes: mistakes, totalChars, correctChars };
 }
 
-export function createTypingRecorder() {
-  const timeLine: TimeLineSnapshot[] = [];
-  const mistakeLog: Mistake[] = [];
-  let sessionData: TypingSession = {
-    totalTimeMs: 0,
-    reason: "exit",
-    timeLine: [],
-    event: { mistakeLog: [] },
-  };
+export function createTypingSessionRecorder(
+  sessionConfig: TypingConfiguration | null,
+) {
+  let timeLine: TimeLineSnapshot[] = [];
+  let mistakeEvent: Mistake[] = [];
+  let keyEvent: KeyStroke[] = [];
 
   let startTime: number | null = null;
+  let startWallTime: number | null = null;
   let lastTickTime: number | null = null;
+  let typingSessionID: string | null = null;
+  let recording = false;
 
+  let sessionHeader: TypingSessionHeader = DEFAULT_TYPING_SESSION.header;
+
+  if (sessionConfig) sessionHeader.configuration = sessionConfig;
+  let session: TypingSession = {
+    header: sessionHeader,
+    body: {
+      text: "",
+      timeLine,
+      event: {
+        mistakeEvent,
+        keyEvent,
+      },
+    },
+  };
   const start = () => {
     startTime = performance.now();
     lastTickTime = startTime;
+    startWallTime = Date.now();
+    recording = true;
+
     timeLine.length = 0;
-    mistakeLog.length = 0;
+    mistakeEvent.length = 0;
+    keyEvent.length = 0;
+    typingSessionID = crypto.randomUUID();
   };
 
   const tick = (
@@ -97,7 +108,12 @@ export function createTypingRecorder() {
     typedTextSlice: string,
     caretIndex: number,
   ) => {
-    if (startTime === null || lastTickTime === null) {
+    if (
+      startTime === null ||
+      lastTickTime === null ||
+      typingSessionID === null ||
+      !recording
+    ) {
       throw Error("typing session recording is never started");
     }
 
@@ -105,40 +121,73 @@ export function createTypingRecorder() {
     const totalElapsedTimeMs = now - startTime;
     const deltaTimeMs = now - lastTickTime;
     lastTickTime = now;
-
-    const { metrics, detectedMistakes } = calculateLiveMetrics(
+    const { detectedMistakes, totalChars, correctChars } = evaluateText(
       expectedTextSlice,
       typedTextSlice,
-      deltaTimeMs,
       caretIndex,
     );
 
     const timeLineSnapshot: TimeLineSnapshot = {
       timeStamp: Date.now(),
       elapsedTimeMs: Math.round(totalElapsedTimeMs),
-      charsTyped: typedTextSlice.length,
-      metrics,
+      deltaTimeMs,
+      correctChars,
+      totalChars,
     };
     timeLine.push(timeLineSnapshot);
     if (detectedMistakes.length > 0) {
-      const existingIndices = new Set(mistakeLog.map((m) => m.index));
+      const existingIndices = new Set(mistakeEvent.map((m) => m.index));
       const uniqueNewMistakes = detectedMistakes.filter(
         (newMistake) => !existingIndices.has(newMistake.index),
       );
-      mistakeLog.push(...uniqueNewMistakes);
+      mistakeEvent.push(...uniqueNewMistakes);
     }
   };
 
-  const stop = (reason: EndReason): TypingSession => {
-    if (startTime === null)
-      throw Error("typing session recording is never started");
-    sessionData = {
-      totalTimeMs: Math.round(performance.now() - startTime),
-      reason,
-      timeLine,
-      event: { mistakeLog },
-    };
-    return sessionData;
+  const record = ({
+    prevKeyTimeStamp,
+    timestamp,
+    key,
+    cursorIndex,
+    action,
+  }: KeyStroke) => {
+    keyEvent.push({
+      prevKeyTimeStamp,
+      timestamp,
+      key,
+      cursorIndex,
+      action,
+    });
   };
-  return { start, tick, stop };
+
+  const stop = (reason: EndReason, text: string): TypingSession => {
+    if (
+      startTime === null ||
+      lastTickTime === null ||
+      typingSessionID === null ||
+      !recording
+    )
+      throw Error("typing session recording is never started");
+    const endWallTime = Date.now();
+    sessionHeader = {
+      ...sessionHeader,
+      id: typingSessionID,
+      startTimestamp: startWallTime,
+      endTimestamp: endWallTime,
+      reason,
+    };
+    session = {
+      header: sessionHeader,
+      body: {
+        text,
+        timeLine,
+        event: {
+          mistakeEvent,
+          keyEvent,
+        },
+      },
+    };
+    return session;
+  };
+  return { recording, start, tick, record, stop };
 }

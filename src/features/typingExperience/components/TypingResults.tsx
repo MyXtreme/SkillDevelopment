@@ -1,4 +1,4 @@
-import { useAppContext } from "../../../context/appContext";
+import { useState } from "react";
 import { useTypingContext } from "../context/TypingContext";
 import resultStyles from "./typing-results.module.css";
 
@@ -6,20 +6,21 @@ interface TypingResultsProps {
   onRetry: () => void;
   onNext: () => void;
 }
-
+type QualityTab = "speed" | "accuracy" | "consistency" | "none";
 function TypingResults({ onRetry, onNext }: TypingResultsProps) {
-  const { app } = useAppContext();
-  const { typingState, typingAction } = useTypingContext();
+  const { typingState } = useTypingContext();
+  const [activeTab, setActiveTab] = useState<QualityTab>("none");
 
-  const snapshot = typingState.session.timeLine.at(-1);
+  const timeLine = typingState.session.body.timeLine;
+  const snapshot = timeLine.at(-1);
   //TODO: Implement average value of array or other proper delivery of summary
   if (!snapshot)
     throw Error(
       "the session data is undefined, unable to render results from undefined",
     );
-  const wpm = snapshot.metrics.wpm;
-  const accuracy = snapshot.metrics.accuracy;
-  const raw = snapshot.metrics.raw;
+  const wpm = 0;
+  const accuracy = 0;
+  const raw = 0;
 
   const consistency = 0;
 

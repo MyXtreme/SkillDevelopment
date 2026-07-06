@@ -6,19 +6,16 @@ import { generateTextTokens } from "../utils/textHighlighter";
 
 import typingDisplayStyles from "./typing-display.module.css";
 import { Fragment } from "react/jsx-runtime";
+import { useTypingEngine } from "../hooks/useTypingEngine";
+import { useTypingText } from "../hooks/useTypingText";
 
-interface TypingDisplay {
-  time: number;
-  typedText: string;
-  currentText: string;
-}
-
-export default function TypingDisplay({
-  time,
-  typedText,
-  currentText,
-}: TypingDisplay) {
+export default function TypingDisplay() {
   const { typingState } = useTypingContext();
+  const { currentText, appendBuffer } = useTypingText();
+  const { typedText, time } = useTypingEngine({
+    currentText,
+    onBufferLow: appendBuffer,
+  });
 
   const tokens = generateTextTokens(currentText, typedText);
   const { scrollOffset, setSpanRef } = useAutoScroll(typedText.length);

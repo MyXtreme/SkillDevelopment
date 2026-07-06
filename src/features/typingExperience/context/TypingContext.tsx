@@ -1,5 +1,8 @@
 import { useState, useContext, createContext, type ReactNode } from "react";
-import { DEFAULT_TYPING_CONFIG } from "../typingDefaults";
+import {
+  DEFAULT_TYPING_CONFIG,
+  DEFAULT_TYPING_SESSION,
+} from "../typingDefaults";
 
 export type TypingActivity = "measure" | "practice" | "compete" | "explore";
 export type TypingStatus = "idle" | "running" | "finished";
@@ -26,8 +29,9 @@ export interface Metrics {
 export interface TimeLineSnapshot {
   timeStamp: number;
   elapsedTimeMs: number;
-  charsTyped: number;
-  metrics: Metrics;
+  deltaTimeMs: number;
+  correctChars: number;
+  totalChars: number;
 }
 export type MistakeType = "incorrect" | "miss" | "spam" | "double-tap";
 export interface Mistake {
@@ -36,11 +40,36 @@ export interface Mistake {
   typedCharacter: string;
   expectedCharacter: string;
 }
-export type TypingSession = {
-  totalTimeMs: number;
+
+export type KeyAction = "shortcut" | "delete" | "insert";
+
+export interface KeyStroke {
+  prevKeyTimeStamp: number | null;
+  timestamp: number;
+  key: string;
+  cursorIndex: number;
+  action: KeyAction;
+}
+
+export interface TypingSessionHeader {
+  id: string | null;
+  startTimestamp: number | null;
+  endTimestamp: number | null;
+  configuration: TypingConfiguration;
   reason: EndReason;
+}
+export interface TypingSessionBody {
+  text: string | null;
   timeLine: TimeLineSnapshot[];
-  event: { mistakeLog: Mistake[] };
+  event: {
+    mistakeEvent: Mistake[];
+    keyEvent: KeyStroke[];
+  };
+}
+
+export type TypingSession = {
+  header: TypingSessionHeader;
+  body: TypingSessionBody;
 };
 
 type TypingState = {
@@ -68,29 +97,8 @@ export function TypingProvider({ children }: { children: ReactNode }) {
   const [typingState, setTypingState] = useState<TypingState>({
     activity: "measure",
     status: "idle",
-    config: {
-      duration: 30,
-      wordRange: 25,
-      completeOn: "timeEnd",
-      difficulty: { punctuation: false, numbers: false, uppercase: false },
-    },
-    session: {
-      timeLine: [
-        {
-          timeStamp: 0,
-          elapsedTimeMs: 0,
-          charsTyped: 0,
-          metrics: {
-            wpm: 0,
-            raw: 0,
-            accuracy: 0,
-          },
-        },
-      ],
-      reason: "exit",
-      totalTimeMs: 0,
-      event: { mistakeLog: [] },
-    },
+    config: DEFAULT_TYPING_CONFIG,
+    session: DEFAULT_TYPING_SESSION,
   });
 
   const setActivity = (newActivity: TypingActivity) => {
