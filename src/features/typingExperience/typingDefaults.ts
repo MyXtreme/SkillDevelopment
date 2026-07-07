@@ -8,8 +8,9 @@ export const PERFORMANCE_THRESHOLDS = {
   INIT_RENDER_TEXT_LENGTH: 60,
   CPM_TO_WPM_DIVISOR: 5,
   LOOP_TICK_INTERVAL_MS: 1000,
-  PAUSE_THRESHOLD_MS: 1000,
-  AFK_THRESHOLD_MS: 3000,
+  SPAM_THRESHOLD: 5,
+  PAUSE_THRESHOLD_MS: 400,
+  AFK_THRESHOLD_MS: 2000,
 };
 
 export const MEASURE_CONFIG_OPTIONS = {
@@ -38,15 +39,21 @@ export const DEFAULT_TYPING_SESSION: TypingSession = {
   },
   body: {
     text: null,
-    timeLine: [
-      {
-        timeStamp: 0,
-        elapsedTimeMs: 0,
-        deltaTimeMs: 0,
-        correctChars: 0,
+    history: {
+      liveMetrics: [],
+      timeLine: [],
+      event: { mistakeEvent: [], keyEvent: [] },
+    },
+    summary: {
+      net: {
         totalChars: 0,
+        correctChars: 0,
+        incorrectChars: 0,
       },
-    ],
-    event: { mistakeEvent: [], keyEvent: [] },
+      gross: {
+        totalBackspaces: 0,
+        totalKeyPresses: 0,
+      },
+    },
   },
 };

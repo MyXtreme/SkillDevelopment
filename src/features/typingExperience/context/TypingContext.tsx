@@ -33,7 +33,13 @@ export interface TimeLineSnapshot {
   correctChars: number;
   totalChars: number;
 }
-export type MistakeType = "incorrect" | "miss" | "spam" | "double-tap";
+export type MistakeType =
+  | "incorrect"
+  | "miss"
+  | "repeated"
+  | "spam"
+  | "doubleTap"
+  | "transposed";
 export interface Mistake {
   index: number;
   type: MistakeType;
@@ -50,6 +56,21 @@ export interface KeyStroke {
   cursorIndex: number;
   action: KeyAction;
 }
+export interface LiveMetrices {
+  wpm: number;
+  acc: number;
+}
+export interface TypingSessionSummary {
+  net: {
+    totalChars: number;
+    correctChars: number;
+    incorrectChars: number;
+  };
+  gross: {
+    totalKeyPresses: number;
+    totalBackspaces: number;
+  };
+}
 
 export interface TypingSessionHeader {
   id: string | null;
@@ -60,11 +81,15 @@ export interface TypingSessionHeader {
 }
 export interface TypingSessionBody {
   text: string | null;
-  timeLine: TimeLineSnapshot[];
-  event: {
-    mistakeEvent: Mistake[];
-    keyEvent: KeyStroke[];
+  history: {
+    liveMetrics: LiveMetrices[];
+    timeLine: TimeLineSnapshot[];
+    event: {
+      mistakeEvent: Mistake[];
+      keyEvent: KeyStroke[];
+    };
   };
+  summary: TypingSessionSummary;
 }
 
 export type TypingSession = {
