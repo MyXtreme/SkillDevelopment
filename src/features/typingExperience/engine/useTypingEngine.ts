@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useTypingContext,
   type EndReason,
-  type KeyAction,
+  type TypingSessionSummary,
 } from "../context/TypingContext";
 import { PERFORMANCE_THRESHOLDS } from "../typingDefaults";
-import { createTypingSessionRecorder } from "../engine/typingRecorderFactory";
+import { createTypingSessionRecorder } from "./typingRecorderFactory";
 import { useAppContext } from "../../../context/appContext";
 import useInputManager from "../../../hooks/useInputManager";
 
@@ -24,8 +24,18 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
 
   const typedDelta = useRef("");
   const intervalID = useRef<number | null>(null);
-  const lastKeyTimeRef = useRef<number | null>(null);
   const sessionRecord = useRef(createTypingSessionRecorder(config));
+  const statsRef = useRef<TypingSessionSummary>({
+    net: {
+      totalChars: 0,
+      correctChars: 0,
+      incorrectChars: 0,
+    },
+    gross: {
+      totalKeyPresses: 0,
+      totalBackspaces: 0,
+    },
+  });
 
   const latest = useRef({
     engineStatus: typingState.status,
@@ -50,7 +60,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
       setTime(0);
       setTypedText("");
       typedDelta.current = "";
-      lastKeyTimeRef.current = null;
     }
   }, [engineStatus]);
 
@@ -59,7 +68,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
       setTime(0);
       setTypedText("");
       typedDelta.current = "";
-      lastKeyTimeRef.current = null;
     }
   }, [engineStatus, config.difficulty, config.completeOn, config.wordRange]);
 
@@ -68,9 +76,11 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
       if (intervalID.current) clearInterval(intervalID.current);
       intervalID.current = null;
 
+      statsRef.current.net.totalChars = latest.current.typedText.length;
       const finalSession = sessionRecord.current.stop(
         reason,
         latest.current.currentText,
+        statsRef.current,
       );
       typingAction.setSession(finalSession);
       typingAction.setStatus("finished");
@@ -93,45 +103,85 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
         return;
       if (currentStatus === "finished") return;
 
+      const cursorIndex = activeTyped.length;
+      const shouldBreak = sessionRecord.current.capture(
+        key,
+        activeText[cursorIndex],
+        cursorIndex,
+      );
+
+      if (shouldBreak) {
+        return;
+      }
       if (currentStatus === "idle" || currentStatus === "running") {
-        const now = Date.now();
-        let actionType: KeyAction | null = null;
         let nextLength = activeTyped.length;
 
         if (key === "Backspace") {
           e.preventDefault();
           if (currentStatus === "idle") return;
 
-          actionType = "delete";
           nextLength = Math.max(0, activeTyped.length - 1);
+          statsRef.current.gross.totalBackspaces++;
+
+          if (cursorIndex <= 0) return;
+
+          const indexToDelete = cursorIndex - 1;
+          const charsToDelete = activeTyped[indexToDelete];
+          const expectedChar = activeText[indexToDelete];
+
+          if (charsToDelete === expectedChar) {
+            statsRef.current.net.correctChars--;
+          } else {
+            statsRef.current.net.incorrectChars--;
+          }
           setTypedText((prev) => prev.slice(0, -1));
           typedDelta.current = typedDelta.current.slice(0, -1);
         } else if (key.length === 1 || key === " ") {
           e.preventDefault();
-          actionType = "insert";
-          nextLength = activeTyped.length + 1;
+          const currentIndex = activeTyped.length;
+          nextLength = 1 + 1;
 
           if (currentStatus === "idle") {
             sessionRecord.current = createTypingSessionRecorder(currentConfig);
             sessionRecord.current.start();
+            sessionRecord.current.capture(
+              key,
+              activeText[cursorIndex],
+              cursorIndex,
+            );
             typingAction.setStatus("running");
             action.changeLayoutMode("focused");
+
+            statsRef.current = {
+              net: {
+                totalChars: 0,
+                correctChars: 0,
+                incorrectChars: 0,
+              },
+              gross: {
+                totalKeyPresses: 0,
+                totalBackspaces: 0,
+              },
+            };
           }
 
           const charToAppend = key === " " ? " " : key;
+
+          if (charToAppend === activeText[currentIndex]) {
+            statsRef.current.net.correctChars++;
+          } else {
+            statsRef.current.net.incorrectChars++;
+          }
+          statsRef.current.gross.totalKeyPresses++;
           setTypedText((prev) => prev + charToAppend);
           typedDelta.current += charToAppend;
-        }
 
-        if (actionType !== null) {
-          sessionRecord.current.record({
-            prevKeyTimeStamp: lastKeyTimeRef.current,
-            timestamp: now,
-            key,
-            cursorIndex: activeTyped.length,
-            action: actionType,
-          });
-          lastKeyTimeRef.current = now;
+          if (
+            currentConfig.completeOn === "textEnd" &&
+            nextLength >= activeText.length
+          ) {
+            terminateEngineRun("textEnd");
+          }
         }
 
         if (currentConfig.completeOn === "timeEnd") {
@@ -141,12 +191,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
           ) {
             onBufferLow();
           }
-        }
-        if (
-          currentConfig.completeOn === "textEnd" &&
-          nextLength >= activeText.length
-        ) {
-          terminateEngineRun("textEnd");
         }
       }
     },
@@ -178,7 +222,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
       sessionRecord.current.tick(
         curOrig.slice(deltaStart, caretIndex),
         typedDelta.current,
-        deltaStart,
       );
       typedDelta.current = "";
     }, PERFORMANCE_THRESHOLDS.LOOP_TICK_INTERVAL_MS);

@@ -6,12 +6,12 @@ import { generateTextTokens } from "../utils/textHighlighter";
 
 import typingDisplayStyles from "./typing-display.module.css";
 import { Fragment } from "react/jsx-runtime";
-import { useTypingEngine } from "../hooks/useTypingEngine";
-import { useTypingText } from "../hooks/useTypingText";
+import { useTypingEngine } from "../engine/useTypingEngine";
+import { useEngineText } from "../engine/useEngineText";
 
 export default function TypingDisplay() {
   const { typingState } = useTypingContext();
-  const { currentText, appendBuffer } = useTypingText();
+  const { currentText, appendBuffer } = useEngineText();
   const { typedText, time } = useTypingEngine({
     currentText,
     onBufferLow: appendBuffer,

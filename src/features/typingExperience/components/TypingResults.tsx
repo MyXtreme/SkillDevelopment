@@ -11,13 +11,8 @@ function TypingResults({ onRetry, onNext }: TypingResultsProps) {
   const { typingState } = useTypingContext();
   const [activeTab, setActiveTab] = useState<QualityTab>("none");
 
-  const timeLine = typingState.session.body.timeLine;
-  const snapshot = timeLine.at(-1);
   //TODO: Implement average value of array or other proper delivery of summary
-  if (!snapshot)
-    throw Error(
-      "the session data is undefined, unable to render results from undefined",
-    );
+
   const wpm = 0;
   const accuracy = 0;
   const raw = 0;
