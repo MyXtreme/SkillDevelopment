@@ -24,6 +24,7 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
 
   const typedDelta = useRef("");
   const intervalID = useRef<number | null>(null);
+  const isTerminating = useRef(false);
   const sessionRecord = useRef(createTypingSessionRecorder(config));
   const statsRef = useRef<TypingSessionSummary>({
     net: {
@@ -73,10 +74,25 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
 
   const terminateEngineRun = useCallback(
     (reason: EndReason) => {
+      if (isTerminating.current) return;
+      if (!sessionRecord.current || !sessionRecord.current.recording) return;
+
+      isTerminating.current = true;
+
       if (intervalID.current) clearInterval(intervalID.current);
       intervalID.current = null;
-
       statsRef.current.net.totalChars = latest.current.typedText.length;
+      const { typedText: curTyped, currentText: curOrig } = latest.current;
+      if (typedDelta.current.length > 0) {
+        const caretIndex = curTyped.length;
+        const deltaStart = Math.max(0, caretIndex - typedDelta.current.length);
+        sessionRecord.current.tick(
+          curOrig.slice(deltaStart, caretIndex),
+          typedDelta.current,
+        );
+        typedDelta.current = "";
+      }
+
       const finalSession = sessionRecord.current.stop(
         reason,
         latest.current.currentText,
@@ -109,7 +125,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
         activeText[cursorIndex],
         cursorIndex,
       );
-
       if (shouldBreak) {
         return;
       }
@@ -142,13 +157,21 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
           nextLength = 1 + 1;
 
           if (currentStatus === "idle") {
-            sessionRecord.current = createTypingSessionRecorder(currentConfig);
+            if (
+              sessionRecord.current.typingSessionID === null &&
+              sessionRecord.current === null
+            ) {
+              console.warn("created second session recorder");
+              sessionRecord.current =
+                createTypingSessionRecorder(currentConfig);
+            }
             sessionRecord.current.start();
             sessionRecord.current.capture(
               key,
               activeText[cursorIndex],
               cursorIndex,
             );
+            isTerminating.current = false;
             typingAction.setStatus("running");
             action.changeLayoutMode("focused");
 
@@ -203,17 +226,22 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
     if (engineStatus !== "running") return;
 
     intervalID.current = window.setInterval(() => {
+      let holdingTermination = false;
       setTime((prev) => {
         const nextTime = prev + 1;
         if (
           latest.current.config.completeOn === "timeEnd" &&
           nextTime >= latest.current.config.duration
         ) {
-          terminateEngineRun("timeEnd");
+          holdingTermination = true;
+          setTimeout(() => {
+            terminateEngineRun("timeEnd");
+          }, 0);
         }
         return nextTime;
       });
 
+      if (holdingTermination) return;
       const { typedText: curTyped, currentText: curOrig } = latest.current;
       const deltaLength = typedDelta.current.length;
       const caretIndex = curTyped.length;
