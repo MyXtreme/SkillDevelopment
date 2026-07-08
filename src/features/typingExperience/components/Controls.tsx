@@ -3,27 +3,24 @@ import { useState } from "react";
 import { useAppContext } from "../../../context/appContext";
 import { useTypingContext } from "../context/TypingContext";
 import { type TypingConfiguration } from "../context/TypingContext";
+import { MEASURE_CONFIG_OPTIONS } from "../typingDefaults";
 
 import controlStyles from "./controls.module.css";
+import { useTypingConfig } from "../hooks/useTypingConfig";
 
-interface TypingControlsProps {
-  onClickDuration: (duration: TypingConfiguration["duration"]) => void;
-  onClickWordRange: (content: TypingConfiguration["wordRange"]) => void;
-  onClickDifficulty: (difficulty: TypingConfiguration["difficulty"]) => void;
-}
-
-function Controls({
-  onClickDuration,
-  onClickWordRange,
-  onClickDifficulty,
-}: TypingControlsProps) {
+function Controls() {
   const { app } = useAppContext();
-  const { typingState } = useTypingContext();
-  const difficulty = typingState.config.difficulty;
+  const { config, configAction } = useTypingConfig();
   const immersive = app.layoutMode === "focused";
 
   type ActivePanel = "none" | keyof TypingConfiguration;
   const [activePanel, setActivePanel] = useState<ActivePanel>("none");
+
+  const getItemClass = (isActive: boolean, customPanelStyle?: string) =>
+    clsx(controlStyles.controlItems, customPanelStyle, {
+      [controlStyles.activePanel]: isActive,
+    });
+
   return (
     <div
       className={clsx(controlStyles.configControls, { "fade-out": immersive })}
@@ -68,152 +65,64 @@ function Controls({
       </div>
       {activePanel === "duration" && (
         <div className={clsx(controlStyles.panels)}>
-          <button
-            className={clsx(
-              controlStyles.controlItems,
-              controlStyles.configurationPanels,
-              {
-                [controlStyles.activePanel]: typingState.config.duration === 15,
-              },
-            )}
-            onClick={() => {
-              const newTime = 15;
-              onClickDuration(newTime);
-            }}
-          >
-            15s
-          </button>
-          <button
-            className={clsx(
-              controlStyles.controlItems,
-              controlStyles.configurationPanels,
-              {
-                [controlStyles.activePanel]: typingState.config.duration === 30,
-              },
-            )}
-            onClick={() => {
-              const newTime = 30;
-              onClickDuration(newTime);
-            }}
-          >
-            30s
-          </button>
-          <button
-            className={clsx(
-              controlStyles.controlItems,
-              controlStyles.configurationPanels,
-              {
-                [controlStyles.activePanel]: typingState.config.duration === 60,
-              },
-            )}
-            onClick={() => {
-              const newTime = 60;
-              onClickDuration(newTime);
-            }}
-          >
-            60s
-          </button>
+          {MEASURE_CONFIG_OPTIONS.DURATION_OPTIONS.map((time) => {
+            return (
+              <button
+                key={time}
+                className={getItemClass(
+                  config.duration === time,
+                  controlStyles.configurationPanels,
+                )}
+                onClick={() => configAction.setDuration(time)}
+              >
+                {time}
+              </button>
+            );
+          })}
         </div>
       )}
+
       {activePanel === "wordRange" && (
         <div className={clsx(controlStyles.panels)}>
-          <button
-            className={clsx(
-              controlStyles.controlItems,
-              controlStyles.configurationPanels,
-              {
-                [controlStyles.activePanel]:
-                  typingState.config.wordRange === 25,
-              },
-            )}
-            onClick={() => {
-              onClickWordRange(25);
-            }}
-          >
-            25
-          </button>
-          <button
-            className={clsx(
-              controlStyles.controlItems,
-              controlStyles.configurationPanels,
-              {
-                [controlStyles.activePanel]:
-                  typingState.config.wordRange === 50,
-              },
-            )}
-            onClick={() => {
-              onClickWordRange(50);
-            }}
-          >
-            50
-          </button>
-          <button
-            className={clsx(
-              controlStyles.controlItems,
-              controlStyles.configurationPanels,
-              {
-                [controlStyles.activePanel]:
-                  typingState.config.wordRange === 100,
-              },
-            )}
-            onClick={() => {
-              onClickWordRange(100);
-            }}
-          >
-            100
-          </button>
+          {MEASURE_CONFIG_OPTIONS.WORD_RANGE_OPTIONS.map((range) => {
+            return (
+              <button
+                key={range}
+                className={getItemClass(
+                  config.wordRange === range,
+                  controlStyles.configurationPanels,
+                )}
+                onClick={() => configAction.setWordRange(range)}
+              >
+                {range}
+              </button>
+            );
+          })}
         </div>
       )}
       {activePanel === "difficulty" && (
         <div className={clsx(controlStyles.panels)}>
-          <button
-            className={clsx(
-              controlStyles.controlItems,
-              controlStyles.configurationPanels,
-              { [controlStyles.activePanel]: difficulty.punctuation },
-            )}
-            onClick={() => {
-              const newDifficulty = !difficulty.punctuation;
-              onClickDifficulty({
-                ...difficulty,
-                punctuation: newDifficulty,
-              });
-            }}
-          >
-            Punctuation
-          </button>
-          <button
-            className={clsx(
-              controlStyles.controlItems,
-              controlStyles.configurationPanels,
-              { [controlStyles.activePanel]: difficulty.numbers },
-            )}
-            onClick={() => {
-              const newDifficulty = !difficulty.numbers;
-              onClickDifficulty({
-                ...difficulty,
-                numbers: newDifficulty,
-              });
-            }}
-          >
-            Numbers
-          </button>
-          <button
-            className={clsx(
-              controlStyles.controlItems,
-              controlStyles.configurationPanels,
-              { [controlStyles.activePanel]: difficulty.uppercase },
-            )}
-            onClick={() => {
-              const newDifficulty = !difficulty.uppercase;
-              onClickDifficulty({
-                ...difficulty,
-                uppercase: newDifficulty,
-              });
-            }}
-          >
-            Upper-case
-          </button>
+          {(["punctuation", "numbers", "uppercase"] as const).map((key) => {
+            const isActive = config.difficulty[key];
+            return (
+              <button
+                key={key}
+                className={clsx(
+                  controlStyles.controlItems,
+                  controlStyles.configurationPanels,
+                  { [controlStyles.activePanel]: isActive },
+                )}
+                onClick={() =>
+                  configAction.setDifficulty({
+                    ...config.difficulty,
+                    [key]: !isActive,
+                  })
+                }
+              >
+                {key}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

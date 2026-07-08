@@ -5,43 +5,23 @@ import { TypingProvider, useTypingContext } from "./context/TypingContext";
 import Controls from "./components/Controls";
 import TypingDisplay from "./components/TypingDisplay";
 import TypingResults from "./components/TypingResults";
-import { useTypingLifecycle } from "./engine/useTypingLifecycle";
+import { useTypingLifecycle } from "./hooks/useTypingLifecycle";
 
 function TypingView() {
   const { app } = useAppContext();
-  const { typingState } = useTypingContext();
 
-  const isIdle = typingState.status === "idle";
-  const isRunning = typingState.status === "running";
-  const isFinished = typingState.status === "finished";
+  const { status, handler } = useTypingLifecycle();
 
-  const {
-    ui,
-    handleRetry,
-    handleNext,
-    handleClickDuration,
-    handleClickWordRange,
-    handleClickDifficulty,
-  } = useTypingLifecycle();
+  const isIdle = status === "idle";
+  const isRunning = status === "running";
+  const isFinished = status === "finished";
   const immersive = app.layoutMode === "focused";
   return (
     <main className="section" id="main">
-      {!isFinished && (
-        <Controls
-          onClickDuration={handleClickDuration}
-          onClickWordRange={handleClickWordRange}
-          onClickDifficulty={handleClickDifficulty}
-        />
-      )}
-      {(isIdle || isRunning) && (
-        <TypingDisplay
-          time={ui.time}
-          typedText={ui.typedText}
-          currentText={ui.currentText}
-        />
-      )}
+      {!isFinished && <Controls />}
+      {(isIdle || isRunning) && <TypingDisplay />}
       {isFinished && (
-        <TypingResults onRetry={handleRetry} onNext={handleNext} />
+        <TypingResults onRetry={handler.retry} onNext={handler.continue} />
       )}
       <section
         className={clsx({ "fade-out": immersive })}
