@@ -201,36 +201,68 @@ export function calculatedDerivedMetrics(
   };
 }
 
+export const emptyMetrics: DerivedTypingMetrics = {
+  speed: { wpm: 0, raw: 0, cpm: 0, burst: 0, averageWpm: 0, peakWpm: 0 },
+  accuracy: {
+    accuracy: 0,
+    realAccuracy: 0,
+    errors: { total: 0, corrected: 0, uncorrected: 0, byType: {} as any },
+  },
+  consistency: { score: 0, variance: 0 },
+  engagement: {
+    activeTime: 0,
+    pauseTime: 0,
+    pauseCount: 0,
+    afkTime: 0,
+    averagePause: 0,
+  },
+  progress: {
+    completed: false,
+    completedCharacters: 0,
+    totalCharacters: 0,
+    completion: 0,
+    duration: 0,
+  },
+};
+
 export function useTypingMetrics() {
   const { typingState } = useTypingContext();
-  const [metrics, setMetrics] = useState<DerivedTypingMetrics | null>(null);
+  const [metrics, setMetrics] = useState<DerivedTypingMetrics>(emptyMetrics);
+  console.log(metrics);
+  const [errorMsg, setErrorMsg] = useState<string>();
   const { session, status } = typingState;
 
   useEffect(() => {
     if (status === "finished") {
       if (!session.header.startTimestamp || !session.header.endTimestamp) {
-        console.warn("typing session finished withoud valid timestamp");
+        setErrorMsg("typing session finished withoud valid timestamp");
+        setMetrics(emptyMetrics);
         return;
       }
       const duration =
         session.header.endTimestamp - session.header.startTimestamp;
       if (duration < 500) {
-        console.warn("session was too short to generate meaningfull metrics.");
+        setErrorMsg("session was too short to generate meaningfull metrics.");
+        setMetrics(emptyMetrics);
         return;
       }
       if (session.header.reason === "force-exit") {
-        console.warn("session didn't take place due to force exit");
+        setErrorMsg("session didn't take place due to force exit");
+        setMetrics(emptyMetrics);
         return;
       }
       if (session.body.summary.gross.totalKeyPresses === 0) {
-        console.warn("No keystrokes recorded.");
+        setErrorMsg("No keystrokes recorded.");
+        setMetrics(emptyMetrics);
         return;
       }
 
       const derived = calculatedDerivedMetrics(session);
       setMetrics(derived);
     } else if (status === "idle") {
-      setMetrics(null);
+      setMetrics(emptyMetrics);
     }
   }, [session, status]);
+
+  return metrics;
 }

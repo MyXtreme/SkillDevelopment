@@ -67,7 +67,7 @@
 
 .panels .activePanel {
   color: var(--color-accent) !important;
-  font-weight: 600;
+  font-weight: 800;
 
   background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);
 }
