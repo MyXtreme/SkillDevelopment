@@ -110,6 +110,9 @@ export function createTypingSessionRecorder(
   };
 
   const start = () => {
+    if (startTime !== null || startWallTime !== null || recording) {
+      console.warn("recorder starting for second time");
+    }
     startTime = performance.now();
     lastTickTime = startTime;
     startWallTime = Date.now();
@@ -166,7 +169,7 @@ export function createTypingSessionRecorder(
     cursorIndex: number,
   ): boolean => {
     if (startTime === null || typingSessionID === null || !recording) {
-      start();
+      return false;
     }
 
     const now = Date.now();
@@ -243,8 +246,9 @@ export function createTypingSessionRecorder(
       lastTickTime === null ||
       typingSessionID === null ||
       !recording
-    )
+    ) {
       throw Error("typing session recording is never started");
+    }
     recording = false;
     const endWallTime = Date.now();
     sessionHeader = {
@@ -271,5 +275,16 @@ export function createTypingSessionRecorder(
     };
     return session;
   };
-  return { recording, start, tick, capture, stop };
+  return {
+    get recording() {
+      return recording;
+    },
+    get typingSessionID() {
+      return typingSessionID;
+    },
+    start,
+    tick,
+    capture,
+    stop,
+  };
 }
