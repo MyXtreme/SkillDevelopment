@@ -8,9 +8,6 @@
   margin-block: var(--space-lg);
   position: relative;
 }
-* {
-  outline: 1px solid black;
-}
 .resultWrapper {
   flex: 1;
   display: flex;
