@@ -41,6 +41,7 @@ export type MistakeType =
   | "doubleTap"
   | "transposed";
 export interface Mistake {
+  elapsedMs: number;
   index: number;
   type: MistakeType;
   typedCharacter: string;
@@ -50,16 +51,14 @@ export interface Mistake {
 export type KeyAction = "shortcut" | "delete" | "insert";
 
 export interface KeyStroke {
-  prevKeyTimeStamp: number | null;
   timestamp: number;
+  elapsedMs: number;
   key: string;
   cursorIndex: number;
   action: KeyAction;
+  correct: boolean | null;
 }
-export interface LiveMetrices {
-  wpm: number;
-  acc: number;
-}
+
 export interface TypingSessionSummary {
   net: {
     totalChars: number;
@@ -81,14 +80,12 @@ export interface TypingSessionHeader {
 }
 export interface TypingSessionBody {
   text: string | null;
-  history: {
-    liveMetrics: LiveMetrices[];
-    timeLine: TimeLineSnapshot[];
-    event: {
-      mistakeEvent: Mistake[];
-      keyEvent: KeyStroke[];
-    };
-  };
+  typed: string | null;
+
+  timeLine: TimeLineSnapshot[];
+  mistakeEvent: Mistake[];
+  keyEvent: KeyStroke[];
+
   summary: TypingSessionSummary;
 }
 

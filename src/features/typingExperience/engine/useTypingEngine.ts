@@ -26,17 +26,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
   const intervalID = useRef<number | null>(null);
   const isTerminating = useRef(false);
   const sessionRecord = useRef(createTypingSessionRecorder(config));
-  const statsRef = useRef<TypingSessionSummary>({
-    net: {
-      totalChars: 0,
-      correctChars: 0,
-      incorrectChars: 0,
-    },
-    gross: {
-      totalKeyPresses: 0,
-      totalBackspaces: 0,
-    },
-  });
 
   const latest = useRef({
     engineStatus: typingState.status,
@@ -81,10 +70,10 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
 
       if (intervalID.current) clearInterval(intervalID.current);
       intervalID.current = null;
-      statsRef.current.net.totalChars = latest.current.typedText.length;
+
       const { typedText: curTyped, currentText: curOrig } = latest.current;
+      const caretIndex = curTyped.length;
       if (typedDelta.current.length > 0) {
-        const caretIndex = curTyped.length;
         const deltaStart = Math.max(0, caretIndex - typedDelta.current.length);
         sessionRecord.current.tick(
           curOrig.slice(deltaStart, caretIndex),
@@ -96,7 +85,7 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
       const finalSession = sessionRecord.current.stop(
         reason,
         latest.current.currentText,
-        statsRef.current,
+        latest.current.typedText,
       );
       typingAction.setSession(finalSession);
       typingAction.setStatus("finished");
@@ -136,25 +125,13 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
           if (currentStatus === "idle") return;
 
           nextLength = Math.max(0, activeTyped.length - 1);
-          statsRef.current.gross.totalBackspaces++;
 
           if (cursorIndex <= 0) return;
-
-          const indexToDelete = cursorIndex - 1;
-          const charsToDelete = activeTyped[indexToDelete];
-          const expectedChar = activeText[indexToDelete];
-
-          if (charsToDelete === expectedChar) {
-            statsRef.current.net.correctChars--;
-          } else {
-            statsRef.current.net.incorrectChars--;
-          }
           setTypedText((prev) => prev.slice(0, -1));
           typedDelta.current = typedDelta.current.slice(0, -1);
         } else if (key.length === 1 || key === " ") {
           e.preventDefault();
-          const currentIndex = activeTyped.length;
-          nextLength = 1 + 1;
+          nextLength = activeTyped.length + 1;
 
           if (currentStatus === "idle") {
             if (
@@ -174,28 +151,9 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
             isTerminating.current = false;
             typingAction.setStatus("running");
             action.changeLayoutMode("focused");
-
-            statsRef.current = {
-              net: {
-                totalChars: 0,
-                correctChars: 0,
-                incorrectChars: 0,
-              },
-              gross: {
-                totalKeyPresses: 0,
-                totalBackspaces: 0,
-              },
-            };
           }
 
           const charToAppend = key === " " ? " " : key;
-
-          if (charToAppend === activeText[currentIndex]) {
-            statsRef.current.net.correctChars++;
-          } else {
-            statsRef.current.net.incorrectChars++;
-          }
-          statsRef.current.gross.totalKeyPresses++;
           setTypedText((prev) => prev + charToAppend);
           typedDelta.current += charToAppend;
 
