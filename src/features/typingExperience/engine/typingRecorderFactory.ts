@@ -23,7 +23,6 @@ interface ProgressSnapshot {
 export function evaluateText(
   expectedTextSlice: string,
   typedTextSlice: string,
-  timeMs: number,
 ): ProgressSnapshot {
   const fallbackResponse: ProgressSnapshot = {
     totalChars: 0,
@@ -31,7 +30,7 @@ export function evaluateText(
     incorrectChars: 0,
   };
 
-  if (!expectedTextSlice || !typedTextSlice || timeMs <= 0) {
+  if (!expectedTextSlice || !typedTextSlice) {
     return fallbackResponse;
   }
 
@@ -54,19 +53,6 @@ export function evaluateText(
       incorrectChars++;
     }
   }
-
-  const timeMin = timeMs / 60000;
-  const wordNum = correctChars / PERFORMANCE_THRESHOLDS.CPM_TO_WPM_DIVISOR;
-
-  const wpm = Math.max(0, Math.round(wordNum / timeMin));
-
-  const acc =
-    totalChars > 0
-      ? Math.min(
-          100,
-          Math.max(0, Math.round((correctChars / totalChars) * 100)),
-        )
-      : 0;
   return {
     totalChars,
     correctChars,
@@ -74,8 +60,81 @@ export function evaluateText(
   };
 }
 
-export function keystrokeMistakeAnalyzer() {
-  let lastIncorrectChar: string | null = null;
+export interface MistakeStreakState {
+  lastTypedChar: string | null;
+  lastStrokeCorrect: boolean;
+  lastIncorrectChar: string | null;
+  consecutiveErrorCount: number;
+}
+
+export const initialStreakState = (): MistakeStreakState => ({
+  lastTypedChar: null,
+  lastStrokeCorrect: true,
+  lastIncorrectChar: null,
+  consecutiveErrorCount: 0,
+});
+
+export interface ClassifyResult {
+  type: MistakeType | null;
+  shouldBlock: boolean;
+  nextState: MistakeStreakState;
+}
+
+export function classifyKeystroke(
+  key: string,
+  expectedChar: string | null,
+  state: MistakeStreakState,
+): ClassifyResult {
+  const isCorrect = key === expectedChar;
+
+  if (isCorrect) {
+    return {
+      type: null,
+      shouldBlock: false,
+      nextState: {
+        lastTypedChar: key,
+        lastStrokeCorrect: true,
+        lastIncorrectChar: null,
+        consecutiveErrorCount: 0,
+      },
+    };
+  }
+
+  if (/\s/.test(key) && expectedChar && !/\s/.test(expectedChar)) {
+    return {
+      type: "miss",
+      shouldBlock: false,
+      nextState: {
+        ...state,
+        lastIncorrectChar: null,
+        consecutiveErrorCount: 0,
+      },
+    };
+  }
+
+  if (key === state.lastIncorrectChar) {
+    const count = state.consecutiveErrorCount + 1;
+    const isSpam = count > PERFORMANCE_THRESHOLDS.SPAM_THRESHOLD;
+    return {
+      type: isSpam ? "spam" : "repeated",
+      shouldBlock: isSpam,
+      nextState: { ...state, consecutiveErrorCount: count },
+    };
+  }
+
+  if (key === state.lastTypedChar && state.lastStrokeCorrect) {
+    return {
+      type: "doubleTap",
+      shouldBlock: false,
+      nextState: { ...state, lastIncorrectChar: key, consecutiveErrorCount: 1 },
+    };
+  }
+
+  return {
+    type: "incorrect",
+    shouldBlock: false,
+    nextState: { ...state, lastIncorrectChar: key, consecutiveErrorCount: 1 },
+  };
 }
 
 export function createTypingSessionRecorder(
@@ -88,15 +147,10 @@ export function createTypingSessionRecorder(
   let startTime: number | null = null;
   let startWallTime: number | null = null;
   let lastTickTime: number | null = null;
-  let lastKeyTime: number | null = null;
   let typingSessionID: string | null = null;
   let recording = false;
 
-  let lastTypedChar: string | null = null;
-  let lastStrokeCorrect = true;
-  let lastIncorrectChar: string | null = null;
-  let consecutiveErrorCount = 0;
-
+  let streakState = initialStreakState();
   const summary: TypingSessionSummary = {
     net: {
       totalChars: 0,
@@ -123,18 +177,13 @@ export function createTypingSessionRecorder(
     startTime = performance.now();
     lastTickTime = startTime;
     startWallTime = Date.now();
-    lastKeyTime = Date.now();
     recording = true;
+    streakState = initialStreakState();
 
     timeLine.length = 0;
     mistakeEvent.length = 0;
     keyEvent.length = 0;
     typingSessionID = crypto.randomUUID();
-
-    lastTypedChar = null;
-    lastStrokeCorrect = true;
-    lastIncorrectChar = null;
-    consecutiveErrorCount = 0;
   };
 
   const tick = (expectedTextSlice: string, typedTextSlice: string) => {
@@ -154,7 +203,6 @@ export function createTypingSessionRecorder(
     const { totalChars, correctChars } = evaluateText(
       expectedTextSlice,
       typedTextSlice,
-      deltaTimeMs,
     );
 
     const timeLineSnapshot: TimeLineSnapshot = {
@@ -179,20 +227,11 @@ export function createTypingSessionRecorder(
     }
 
     const now = Date.now();
-    const prevKeyTimeStamp = lastKeyTime ?? startWallTime ?? now;
     const elapsedMs = now - (startWallTime ?? now);
-    lastKeyTime = now;
-
     const action: KeyAction = key === "Backspace" ? "delete" : "insert";
 
     if (action === "delete") {
       summary.gross.totalBackspaces++;
-      if (cursorIndex > 0) {
-        lastStrokeCorrect
-          ? summary.net.correctChars--
-          : summary.net.incorrectChars--;
-        summary.net.totalChars--;
-      }
       keyEvent.push({
         timestamp: now,
         elapsedMs,
@@ -201,49 +240,25 @@ export function createTypingSessionRecorder(
         action,
         correct: null,
       });
-      lastTypedChar = null;
-      lastStrokeCorrect = true;
-      lastIncorrectChar = null;
-      consecutiveErrorCount = 0;
+      if (cursorIndex > 0) {
+        streakState.lastStrokeCorrect
+          ? summary.net.correctChars--
+          : summary.net.incorrectChars--;
+        summary.net.totalChars--;
+      }
+      streakState = initialStreakState();
       return false;
     }
 
-    const isCorrect = key === expectedChar;
-    let shouldBlock = false;
+    const { type, shouldBlock, nextState } = classifyKeystroke(
+      key,
+      expectedChar,
+      streakState,
+    );
+    streakState = nextState;
 
-    if (isCorrect) {
-      summary.net.correctChars++;
-      lastTypedChar = key;
-      lastIncorrectChar = null;
-      lastStrokeCorrect = true;
-      consecutiveErrorCount = 0;
-    } else {
-      summary.net.incorrectChars++;
-      let type: MistakeType = "incorrect";
-
-      if (/\s/.test(key) && expectedChar && !/\s/.test(expectedChar)) {
-        type = "miss";
-        lastIncorrectChar = null;
-        consecutiveErrorCount = 0;
-      } else if (key === lastIncorrectChar) {
-        consecutiveErrorCount++;
-        if (consecutiveErrorCount > PERFORMANCE_THRESHOLDS.SPAM_THRESHOLD) {
-          type = "spam";
-          shouldBlock = true;
-        } else {
-          type = "repeated";
-        }
-      } else if (key === lastTypedChar && lastStrokeCorrect) {
-        type = "doubleTap";
-        lastIncorrectChar = key;
-        consecutiveErrorCount = 1;
-      } else {
-        type = "incorrect";
-        lastIncorrectChar = key;
-        consecutiveErrorCount = 1;
-      }
-      summary.gross.totalKeyPresses++;
-      summary.net.totalChars++;
+    const isCorrect = type === null;
+    if (!isCorrect) {
       mistakeEvent.push({
         elapsedMs,
         index: cursorIndex,
@@ -253,13 +268,17 @@ export function createTypingSessionRecorder(
       });
     }
 
+    isCorrect ? summary.net.correctChars++ : summary.net.incorrectChars++;
+    summary.gross.totalKeyPresses++;
+    summary.net.totalChars++;
+
     keyEvent.push({
       timestamp: now,
       elapsedMs,
       key,
       cursorIndex,
       action,
-      correct: isCorrect,
+      correct: type === null,
     });
     return shouldBlock;
   };
