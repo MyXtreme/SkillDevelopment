@@ -1,8 +1,10 @@
 import { useState, type ReactNode } from "react";
 import { useTypingContext } from "../context/TypingContext";
 import resultStyles from "./typing-results.module.css";
-import { useTypingSessionResults } from "../analyzer/useTypingResults";
+import { useTypingSessionResults } from "../typingResults/useTypingResults";
 import clsx from "clsx";
+import { SpeedChart } from "../typingResults/speedGraph";
+import { analyzeSpeedSeries } from "../typingResults/analyzer";
 
 interface TypingResultsProps {
   onRetry: () => void;
@@ -72,7 +74,15 @@ export default function TypingResults({ onRetry, onNext }: TypingResultsProps) {
         </div>
         {activeTab !== "none" && (
           <div className={resultStyles.detailsArea}>
-            <div className={resultStyles.visual}> Graph goes here</div>
+            {activeTab === "speed" && (
+              <SpeedChart
+                speedPoints={result.speedSeries}
+                showRaw={true}
+                averageWpm={result.metrics.speed.averageWpm}
+              />
+            )}
+            {activeTab === "accuracy" && <></>}
+            {activeTab === "consistency" && <></>}
           </div>
         )}
       </div>
