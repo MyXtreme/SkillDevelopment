@@ -14,6 +14,7 @@ import {
   DEFAULT_TYPING_SESSION,
   PERFORMANCE_THRESHOLDS,
 } from "../typingDefaults";
+import type { PauseSegment } from "./typingObserverFactory";
 
 interface ProgressSnapshot {
   totalChars: number;
@@ -287,6 +288,7 @@ export function createTypingSessionRecorder(
     reason: EndReason,
     text: string,
     typed: string,
+    pauseEvent: PauseSegment[],
   ): TypingSession => {
     if (
       startTime === null ||
@@ -313,6 +315,7 @@ export function createTypingSessionRecorder(
         summary,
         timeLine,
 
+        pauseEvent,
         mistakeEvent,
         keyEvent,
       },

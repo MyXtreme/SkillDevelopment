@@ -40,6 +40,7 @@ export const DEFAULT_TYPING_SESSION: TypingSession = {
   body: {
     text: null,
     typed: null,
+    pauseEvent: [],
     timeLine: [],
     mistakeEvent: [],
     keyEvent: [],

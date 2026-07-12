@@ -3,9 +3,11 @@ import {
   DEFAULT_TYPING_CONFIG,
   DEFAULT_TYPING_SESSION,
 } from "../typingDefaults";
+import type { PauseSegment } from "../engine/typingObserverFactory";
 
 export type TypingActivity = "measure" | "practice" | "compete" | "explore";
 export type TypingStatus = "idle" | "running" | "finished";
+export type TypingEngagement = "active" | "passive";
 
 export type CompletionType = "timeEnd" | "textEnd";
 export type TypingConfiguration = {
@@ -83,6 +85,7 @@ export interface TypingSessionBody {
   typed: string | null;
 
   timeLine: TimeLineSnapshot[];
+  pauseEvent: PauseSegment[];
   mistakeEvent: Mistake[];
   keyEvent: KeyStroke[];
 
@@ -97,6 +100,7 @@ export type TypingSession = {
 type TypingState = {
   activity: TypingActivity;
   status: TypingStatus;
+  engagement: TypingEngagement;
   config: TypingConfiguration;
   session: TypingSession;
 };
@@ -104,6 +108,7 @@ type TypingState = {
 type TypingAction = {
   setActivity: (activity: TypingActivity) => void;
   setStatus: (status: TypingStatus) => void;
+  setEngagement: (engagement: TypingEngagement) => void;
   setConfig: (config: TypingConfiguration) => void;
   setSession: (session: TypingSession) => void;
 };
@@ -119,6 +124,7 @@ export function TypingProvider({ children }: { children: ReactNode }) {
   const [typingState, setTypingState] = useState<TypingState>({
     activity: "measure",
     status: "idle",
+    engagement: "passive",
     config: DEFAULT_TYPING_CONFIG,
     session: DEFAULT_TYPING_SESSION,
   });
@@ -129,6 +135,10 @@ export function TypingProvider({ children }: { children: ReactNode }) {
 
   const setStatus = (newStatus: TypingStatus) => {
     setTypingState((prev) => ({ ...prev, status: newStatus }));
+  };
+
+  const setEngagement = (newEngagement: TypingEngagement) => {
+    setTypingState((prev) => ({ ...prev, engagement: newEngagement }));
   };
 
   const setConfig = (newConfig: TypingConfiguration) => {
@@ -142,6 +152,7 @@ export function TypingProvider({ children }: { children: ReactNode }) {
   const typingAction = {
     setActivity,
     setStatus,
+    setEngagement,
     setConfig,
     setSession,
   };
