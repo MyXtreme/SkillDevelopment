@@ -39,11 +39,12 @@ export const DEFAULT_TYPING_SESSION: TypingSession = {
   },
   body: {
     text: null,
-    history: {
-      liveMetrics: [],
-      timeLine: [],
-      event: { mistakeEvent: [], keyEvent: [] },
-    },
+    typed: null,
+    pauseEvent: [],
+    timeLine: [],
+    mistakeEvent: [],
+    keyEvent: [],
+
     summary: {
       net: {
         totalChars: 0,

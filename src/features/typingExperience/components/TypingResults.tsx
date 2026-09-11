@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from "react";
 import { useTypingContext } from "../context/TypingContext";
 import resultStyles from "./typing-results.module.css";
-import { useTypingMetrics } from "../hooks/useTypingResults";
+import { useTypingSessionResults } from "../typingResults/useTypingResults";
 import clsx from "clsx";
+import { SpeedChart } from "../typingResults/speedGraph";
 
 interface TypingResultsProps {
   onRetry: () => void;
@@ -13,13 +14,12 @@ type QualityTab = "speed" | "accuracy" | "consistency" | "none";
 export default function TypingResults({ onRetry, onNext }: TypingResultsProps) {
   const [activeTab, setActiveTab] = useState<QualityTab>("none");
 
-  const metrics = useTypingMetrics();
-  const wpm = metrics.speed.wpm;
-  const accuracy = metrics.accuracy.accuracy;
-  const consistency = metrics.consistency.score;
-  const afkTime = metrics.engagement.afkTime;
+  const result = useTypingSessionResults();
+  const wpm = result.metrics.speed.wpm;
+  const accuracy = result.metrics.accuracy.accuracy;
+  const consistency = result.metrics.consistency.score;
+  const afkTime = result.metrics.engagement.afkTime;
 
-  //TODO: Implement visual graph building with chart.js library.
   return (
     <div className={resultStyles.resultsArea}>
       <div
@@ -72,7 +72,15 @@ export default function TypingResults({ onRetry, onNext }: TypingResultsProps) {
         </div>
         {activeTab !== "none" && (
           <div className={resultStyles.detailsArea}>
-            <div className={resultStyles.visual}> Graph goes here</div>
+            {activeTab === "speed" && (
+              <SpeedChart
+                speedPoints={result.speedSeries}
+                showRaw={true}
+                averageWpm={result.metrics.speed.averageWpm}
+              />
+            )}
+            {activeTab === "accuracy" && <></>}
+            {activeTab === "consistency" && <></>}
           </div>
         )}
       </div>
