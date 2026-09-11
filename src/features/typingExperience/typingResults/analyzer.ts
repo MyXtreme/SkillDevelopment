@@ -40,6 +40,8 @@ export function analyzeSpeedSeries(session: TypingSession): SpeedPoint[] {
   }
   return points;
 }
+
+//TODO: Real analyzing functions for character state and replay. Or corresponding chart function.
 export function analyzeCharacterState(session: TypingSession) {
   const { text } = session.body;
   const { keyEvent, mistakeEvent } = session.body;

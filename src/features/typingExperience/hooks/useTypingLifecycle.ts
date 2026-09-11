@@ -23,10 +23,22 @@ export function useTypingLifecycle() {
         },
         body: {
           text: preservedText,
+          typed: "",
           timeLine: [],
-          event: {
-            mistakeEvent: [],
-            keyEvent: [],
+
+          pauseEvent: [],
+          mistakeEvent: [],
+          keyEvent: [],
+          summary: {
+            net: {
+              totalChars: 0,
+              correctChars: 0,
+              incorrectChars: 0,
+            },
+            gross: {
+              totalKeyPresses: 0,
+              totalBackspaces: 0,
+            },
           },
         },
       };

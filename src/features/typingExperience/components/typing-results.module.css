@@ -105,49 +105,49 @@
   animation: fadeIn 0.4s ease-out;
 }
 
-.speed-chart-root {
+.speedChartRoot {
   background: var(--color-bg);
   border-radius: var(--corner-lg);
   padding: 20px 20px 12px;
   color: var(--color-primary);
   flex: 1;
 }
-.speed-chart-head {
+.speedChartHead {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 14px;
 }
-.speed-chart-title {
+.speedChartTitle {
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-dim);
 }
-.speed-chart-stats {
+.speedChartStats {
   display: flex;
   gap: 18px;
 }
-.speed-chart-stat {
+.speedChartStat {
   text-align: right;
 }
-.speed-chart-stat .value {
+.speedChartStat .value {
   font-size: 20px;
   font-weight: 600;
   color: var(--text);
   line-height: 1;
 }
-.speed-chart-stat .value.accent {
+.speedChartStat .value.accent {
   color: var(--accent);
 }
-.speed-chart-stat .label {
+.speedChartStat .label {
   font-size: 10px;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-top: 3px;
 }
-.speed-tooltip {
+.speedTooltip {
   background: color-mix(in srgb, var(--color-primary) 4%, var(--color-bg));
   border: 1px solid
     color-mix(in srgb, var(--color-primary) 80%, var(--color-bg));
@@ -156,19 +156,19 @@
   font-size: 11px;
   line-height: 1.5;
 }
-.speed-tooltip .row {
+.speedTooltip .row {
   display: flex;
   justify-content: space-between;
   gap: 14px;
 }
-.speed-tooltip .row .k {
+.speedTooltip .row .k {
   color: var(--text-dim);
 }
-.speed-tooltip .row .v {
+.speedTooltip .row .v {
   color: var(--text);
   font-weight: 600;
 }
-.speed-tooltip .row .v.accent {
+.speedTooltip .row .v.accent {
   color: var(--accent);
 }
 

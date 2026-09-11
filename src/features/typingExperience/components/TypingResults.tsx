@@ -4,7 +4,6 @@ import resultStyles from "./typing-results.module.css";
 import { useTypingSessionResults } from "../typingResults/useTypingResults";
 import clsx from "clsx";
 import { SpeedChart } from "../typingResults/speedGraph";
-import { analyzeSpeedSeries } from "../typingResults/analyzer";
 
 interface TypingResultsProps {
   onRetry: () => void;
@@ -21,7 +20,6 @@ export default function TypingResults({ onRetry, onNext }: TypingResultsProps) {
   const consistency = result.metrics.consistency.score;
   const afkTime = result.metrics.engagement.afkTime;
 
-  //TODO: Implement visual graph building with chart.js library.
   return (
     <div className={resultStyles.resultsArea}>
       <div

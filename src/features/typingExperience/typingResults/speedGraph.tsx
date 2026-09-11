@@ -10,6 +10,8 @@ import {
 } from "recharts";
 import type { SpeedPoint } from "./analyzer";
 import { useMemo, useState } from "react";
+import speedGraphStyles from "../components/typing-results.module.css";
+import clsx from "clsx";
 
 interface SpeedChartProps {
   speedPoints: SpeedPoint[];
@@ -30,15 +32,19 @@ export function SpeedChart({
 
   const hovered = hoverIndex !== null ? data[hoverIndex] : null;
   return (
-    <div className="speed-chart-root">
-      <div className="speed-chart-head">
-        <span className="speed-chart-title">speed</span>
-        <div className="speed-chart-stats">
-          <div className="speed-chart-stat">
-            <div className="value accent">
+    <div className={speedGraphStyles.speedChartRoot}>
+      <div className={speedGraphStyles.speedChartHead}>
+        <span className={speedGraphStyles.speedChartTitle}>speed</span>
+        <div className={speedGraphStyles.speedChartStats}>
+          <div className={speedGraphStyles.speedChartStat}>
+            <div
+              className={clsx(speedGraphStyles.value, speedGraphStyles.accent)}
+            >
               {(hovered ? hovered.wpm : avg).toFixed(0)}
             </div>
-            <div className="label">{hovered ? "at cursor" : "avg wpm"}</div>
+            <div className={speedGraphStyles.label}>
+              {hovered ? "at cursor" : "avg wpm"}
+            </div>
           </div>
         </div>
       </div>
