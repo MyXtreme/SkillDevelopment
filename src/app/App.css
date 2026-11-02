@@ -1,5 +1,6 @@
 #app {
-  min-height: 100vh;
+  height: 100svh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg);
@@ -27,11 +28,12 @@
   flex: 1;
   flex-direction: column;
   position: relative;
+  min-height: 0;
+  overflow: hidden;
 }
 
 #bottomer {
   flex-direction: row;
-
   height: var(--bottomer-height);
 }
 

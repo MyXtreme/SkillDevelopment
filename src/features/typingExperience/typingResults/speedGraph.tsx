@@ -49,7 +49,7 @@ export function SpeedChart({
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={220}>
+      <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
           margin={{ top: 4, right: 8, left: -18, bottom: 0 }}
