@@ -182,6 +182,70 @@
   color: var(--accent);
 }
 
+.minimap {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  padding: var(--space-md);
+  border-radius: var(--corner-lg);
+  background: color-mix(in srgb, var(--color-primary) 3%, var(--color-bg));
+}
+
+.minimapText {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6px, 1fr));
+  grid-auto-rows: 6px;
+  gap: 1px;
+  height: 100%;
+  overflow: hidden;
+  align-content: start;
+  font-size: 0;
+}
+
+.minimapText span {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--color-secondary);
+}
+
+.minimapCorrect {
+  background: var(--color-correct) !important;
+}
+
+.minimapIdle {
+  opacity: 0.18;
+}
+
+.minimapSpace {
+  background: transparent !important;
+}
+
+.mistakeIncorrect {
+  background: color-mix(in srgb, var(--color-incorrect) 45%, var(--color-bg)) !important;
+}
+
+.mistakeMiss {
+  background: color-mix(in srgb, var(--color-incorrect) 60%, var(--color-bg)) !important;
+}
+
+.mistakeDoubleTap {
+  background: color-mix(in srgb, var(--color-incorrect) 68%, var(--color-bg)) !important;
+}
+
+.mistakeRepeated {
+  background: color-mix(in srgb, var(--color-incorrect) 78%, var(--color-bg)) !important;
+}
+
+.mistakeTransposed {
+  background: color-mix(in srgb, var(--color-incorrect) 86%, var(--color-bg)) !important;
+}
+
+.mistakeSpam {
+  background: var(--color-incorrect) !important;
+}
+
 .actionButtons {
   display: flex;
   flex-direction: row;

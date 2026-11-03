@@ -1,9 +1,9 @@
-import { useState, type ReactNode } from "react";
-import { useTypingContext } from "../context/TypingContext";
+import { useState } from "react";
 import resultStyles from "./typing-results.module.css";
 import { useTypingSessionResults } from "../typingResults/useTypingResults";
 import clsx from "clsx";
 import { SpeedChart } from "../typingResults/speedGraph";
+import { AccuracyMinimap } from "../typingResults/accuracyMinimap";
 
 interface TypingResultsProps {
   onRetry: () => void;
@@ -79,7 +79,9 @@ export default function TypingResults({ onRetry, onNext }: TypingResultsProps) {
                 averageWpm={result.metrics.speed.averageWpm}
               />
             )}
-            {activeTab === "accuracy" && <></>}
+            {activeTab === "accuracy" && (
+              <AccuracyMinimap characterStates={result.characterStates} />
+            )}
             {activeTab === "consistency" && <></>}
           </div>
         )}

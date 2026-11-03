@@ -35,8 +35,8 @@ export function useTypingSessionResults() {
     [session, validation.valid],
   );
   const replay = useMemo(
-    () => (validation.valid ? analyzeReplay(session) : []),
-    [session, validation.valid],
+    () => (validation.valid ? analyzeReplay() : []),
+    [validation.valid],
   );
   return {
     metrics,
