@@ -28,13 +28,15 @@ export function AccuracyMinimap({ characterStates }: AccuracyMinimapProps) {
       <div className={minimapStyles.minimapText}>
         {characterStates.map((character) => {
           const characterClass =
-            character.status === "correct"
-              ? minimapStyles.minimapCorrect
-              : character.status === "incorrect"
-                ? character.mistakeType
-                  ? mistakeClassByType[character.mistakeType]
-                  : minimapStyles.mistakeIncorrect
-                : minimapStyles.minimapIdle;
+            character.expected === " "
+              ? minimapStyles.minimapSpace
+              : character.status === "correct"
+                ? minimapStyles.minimapCorrect
+                : character.status === "incorrect"
+                  ? character.mistakeType
+                    ? mistakeClassByType[character.mistakeType]
+                    : minimapStyles.mistakeIncorrect
+                  : minimapStyles.minimapIdle;
 
           return (
             <span
