@@ -18,6 +18,7 @@ export interface CharState {
   expected: string;
   typed: string | null;
   status: CharStatus;
+  mistakeType: MistakeType | null;
 }
 
 export interface ReplayFrame {
@@ -43,15 +44,38 @@ export function analyzeSpeedSeries(session: TypingSession): SpeedPoint[] {
 
 //TODO: Real analyzing functions for character state and replay. Or corresponding chart function.
 export function analyzeCharacterState(session: TypingSession) {
-  const { text } = session.body;
-  const { keyEvent, mistakeEvent } = session.body;
-  if (!text) return [];
+  const { text, typed, mistakeEvent } = session.body;
+  if (!text) return [] as CharState[];
 
   const mistakeByIndex = new Map<number, Mistake>();
   for (const m of mistakeEvent) mistakeByIndex.set(m.index, m);
+
+  const characterCount = Math.max(text.length, typed?.length ?? 0);
+  const states: CharState[] = new Array(characterCount);
+
+  for (let index = 0; index < characterCount; index++) {
+    const expected = text[index] ?? "";
+    const typedCharacter = typed?.[index] ?? null;
+    const status: CharStatus =
+      typedCharacter === null
+        ? "idleChar"
+        : typedCharacter === expected
+          ? "correct"
+          : "incorrect";
+
+    states[index] = {
+      index,
+      expected,
+      typed: typedCharacter,
+      status,
+      mistakeType: mistakeByIndex.get(index)?.type ?? null,
+    };
+  }
+
+  return states;
 }
 
-export function analyzeReplay(session: TypingSession) {
+export function analyzeReplay() {
   return;
 }
 
