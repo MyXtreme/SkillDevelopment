@@ -26,6 +26,7 @@ export interface ReplayFrame {
   cursorIndex: number;
   key: string;
   action: KeyAction;
+  text: string;
 }
 
 export function analyzeSpeedSeries(session: TypingSession): SpeedPoint[] {
@@ -75,8 +76,31 @@ export function analyzeCharacterState(session: TypingSession) {
   return states;
 }
 
-export function analyzeReplay() {
-  return;
+export function analyzeReplay(session: TypingSession): ReplayFrame[] {
+  const { keyEvent } = session.body;
+  const text: string[] = [];
+  const frames: ReplayFrame[] = [];
+
+  for (const event of keyEvent) {
+    const cursorIndex = Math.max(0, Math.min(event.cursorIndex, text.length));
+
+    if (event.action === "delete") {
+      if (cursorIndex > 0) text.splice(cursorIndex - 1, 1);
+    } else {
+      text.splice(cursorIndex, 0, event.key);
+    }
+
+    frames.push({
+      elapsedMs: event.elapsedMs,
+      cursorIndex:
+        event.action === "delete" ? Math.max(0, cursorIndex - 1) : cursorIndex + 1,
+      key: event.key,
+      action: event.action,
+      text: text.join(""),
+    });
+  }
+
+  return frames;
 }
 
 export interface DerivedTypingMetrics {
