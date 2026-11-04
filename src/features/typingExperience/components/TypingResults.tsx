@@ -4,6 +4,7 @@ import { useTypingSessionResults } from "../typingResults/useTypingResults";
 import clsx from "clsx";
 import { SpeedChart } from "../typingResults/speedGraph";
 import { AccuracyMinimap } from "../typingResults/accuracyMinimap";
+import { Replay } from "../typingResults/replay";
 
 interface TypingResultsProps {
   onRetry: () => void;
@@ -82,7 +83,7 @@ export default function TypingResults({ onRetry, onNext }: TypingResultsProps) {
             {activeTab === "accuracy" && (
               <AccuracyMinimap characterStates={result.characterStates} />
             )}
-            {activeTab === "consistency" && <></>}
+            {activeTab === "consistency" && <Replay frames={result.replay} />}
           </div>
         )}
       </div>
