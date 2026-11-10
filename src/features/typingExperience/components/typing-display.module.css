@@ -53,12 +53,15 @@
   position: absolute;
   top: 50%;
   left: 0;
-  width: 2px;
+  width: 4px;
   height: 1em;
   background-color: var(--color-accent);
-  transform: translate(-50%, -50%);
-  animation: caretBlink 1s step-end infinite;
+  transform: translateY(-50%);
   pointer-events: none;
+}
+
+.caretAnimated {
+  animation: caretBlink 1s step-end infinite;
 }
 
 @keyframes caretBlink {

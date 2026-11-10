@@ -22,6 +22,7 @@ export const DEFAULT_TYPING_CONFIG: TypingConfiguration = {
   duration: 30,
   wordRange: 25,
   completeOn: "timeEnd",
+  caretAnimation: false,
   difficulty: {
     punctuation: false,
     numbers: false,

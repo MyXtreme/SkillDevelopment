@@ -45,7 +45,10 @@ export default function TypingDisplay() {
               >
                 {token.isCaretBefore && (
                   <span
-                    className={typingDisplayStyles.caretIndicator}
+                    className={clsx(typingDisplayStyles.caretIndicator, {
+                      [typingDisplayStyles.caretAnimated]:
+                        typingState.config.caretAnimation,
+                    })}
                     aria-hidden="true"
                   />
                 )}
