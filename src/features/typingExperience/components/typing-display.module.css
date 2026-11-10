@@ -44,3 +44,28 @@
   background-color: rgba(230, 57, 70, 10%);
   border-radius: 4px;
 }
+
+.caretAnchor {
+  position: relative;
+}
+
+.caretIndicator {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 4px;
+  height: 1em;
+  background-color: var(--color-accent);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.caretAnimated {
+  animation: caretBlink 1s step-end infinite;
+}
+
+@keyframes caretBlink {
+  50% {
+    opacity: 0;
+  }
+}

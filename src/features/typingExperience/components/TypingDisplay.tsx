@@ -37,11 +37,21 @@ export default function TypingDisplay() {
         >
           {tokens.map((token, index) => (
             <Fragment key={`${token.char}-${index}`}>
-              {token.isCaretBefore && <span className="caretIndicator">|</span>}
               <span
                 ref={setSpanRef(index)}
-                className={typingDisplayStyles[token.classNameKey]}
+                className={clsx(typingDisplayStyles[token.classNameKey], {
+                  [typingDisplayStyles.caretAnchor]: token.isCaretBefore,
+                })}
               >
+                {token.isCaretBefore && (
+                  <span
+                    className={clsx(typingDisplayStyles.caretIndicator, {
+                      [typingDisplayStyles.caretAnimated]:
+                        typingState.config.caretAnimation,
+                    })}
+                    aria-hidden="true"
+                  />
+                )}
                 {token.char}
               </span>
             </Fragment>

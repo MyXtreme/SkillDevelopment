@@ -14,6 +14,7 @@ export type TypingConfiguration = {
   duration: number;
   wordRange: number;
   completeOn: CompletionType;
+  caretAnimation: boolean;
   difficulty: {
     punctuation: boolean;
     numbers: boolean;
