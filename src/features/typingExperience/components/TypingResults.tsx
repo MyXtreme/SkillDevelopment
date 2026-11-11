@@ -81,7 +81,10 @@ export default function TypingResults({ onRetry, onNext }: TypingResultsProps) {
               />
             )}
             {activeTab === "accuracy" && (
-              <AccuracyMinimap characterStates={result.characterStates} />
+              <AccuracyMinimap
+                characterStates={result.characterStates}
+                showUntypedCharacters={result.showUntypedCharacters}
+              />
             )}
             {activeTab === "consistency" && <Replay frames={result.replay} />}
           </div>

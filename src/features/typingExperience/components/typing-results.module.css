@@ -241,8 +241,8 @@
 
 .minimapText {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(6px, 1fr));
-  grid-auto-rows: 6px;
+  grid-template-columns: repeat(auto-fill, minmax(10px, 1fr));
+  grid-auto-rows: 10px;
   gap: 1px;
   height: 100%;
   overflow: hidden;
@@ -253,7 +253,7 @@
 .minimapText span {
   display: block;
   width: 100%;
-  height: 6px;
+  height: 10px;
   border-radius: 2px;
   background: var(--color-secondary);
 }
