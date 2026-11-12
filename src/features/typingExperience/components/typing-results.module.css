@@ -134,9 +134,6 @@
 }
 
 .replayViewport {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
   border-radius: var(--corner-md);
   background: color-mix(in srgb, var(--color-primary) 3%, var(--color-bg));
   padding: var(--space-md);
