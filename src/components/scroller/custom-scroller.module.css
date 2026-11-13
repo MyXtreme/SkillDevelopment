@@ -10,7 +10,8 @@
   flex: 1;
   min-width: 0;
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -28,10 +29,15 @@
   align-items: center;
   min-height: 0;
   opacity: 0;
+  transition: opacity 160ms ease;
 }
 
 .controls[data-visible="true"] {
   opacity: 1;
+}
+
+.controls[data-visible="false"] {
+  pointer-events: none;
 }
 
 .arrowButton {
@@ -46,6 +52,27 @@
   border-radius: var(--corner-sm);
 }
 
+.arrowButton:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.arrowButton:not(:disabled):hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.arrowButton:focus-visible,
+.track:focus-visible {
+  outline: 1px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.arrowButton svg {
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
+
 .track {
   position: relative;
   flex: 1;
@@ -55,6 +82,7 @@
   background: color-mix(in srgb, var(--color-primary) 10%, transparent);
   cursor: pointer;
   touch-action: none;
+  user-select: none;
 }
 
 .thumb {
@@ -64,4 +92,29 @@
   background: color-mix(in srgb, var(--color-primary) 65%, transparent);
   cursor: pointer;
   touch-action: none;
+  will-change: transform;
+}
+
+.thumb:hover {
+  background: var(--color-primary);
+}
+
+.thumb:active {
+  cursor: grabbing;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .controls {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .track {
+    background: Canvas;
+    border: 1px solid CanvasText;
+  }
+  .thumb {
+    background: CanvasText;
+  }
 }
