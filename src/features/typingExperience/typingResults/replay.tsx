@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ReplayFrame } from "./analyzer";
 import resultStyles from "../components/typing-results.module.css";
-import { CustomScroller } from "../../../components/CustomScroller";
+import { CustomScroller } from "../../../components/scroller/CustomScroller";
 
 interface ReplayProps {
   frames: ReplayFrame[];
@@ -21,8 +21,7 @@ export function Replay({ frames }: ReplayProps) {
     return () => timers.forEach((timer) => window.clearTimeout(timer));
   }, [frames]);
 
-  const currentText =
-    frameIndex >= 0 ? frames[frameIndex].text : "";
+  const currentText = frameIndex >= 0 ? frames[frameIndex].text : "";
 
   return (
     <div className={resultStyles.replay}>

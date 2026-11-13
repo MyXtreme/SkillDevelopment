@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import { useTypingContext } from "../context/TypingContext";
 import { useAutoScroll } from "../hooks/useAutoScroll";
-import { formatTimeTick } from "../utils/timeUtils";
-import { generateTextTokens } from "../utils/textHighlighter";
+import { formatTimeTick } from "../typingUtils/timeUtils";
+import { generateTextTokens } from "../typingUtils/textHighlighter";
 
 import typingDisplayStyles from "./typing-display.module.css";
 import { Fragment } from "react/jsx-runtime";
