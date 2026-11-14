@@ -30,12 +30,15 @@ export function CustomScroller({
   ariaLabel = "Scrollable content",
 }: CustomScrollerProps) {
   const { viewportId, refs, state, handlers } = useCustomScroller();
+
   return (
     <div className={styles.scroller}>
       <div
         id={viewportId}
         ref={refs.viewportRef}
         className={[styles.viewport, className].filter(Boolean).join(" ")}
+        role="region"
+        tabIndex={state.isScrollable ? 0 : -1}
         aria-labe={ariaLabel}
         onScroll={handlers.onScroll}
       >
@@ -51,17 +54,26 @@ export function CustomScroller({
           className={styles.arrowButton}
           type="button"
           disabled={!state.canScrollUp}
+          tabIndex={-1}
         >
           <ArrowUpIcon />
         </button>
 
         <div className={styles.track} ref={refs.trackRef}>
-          <div className={styles.thumb} ref={refs.thumbRef}></div>
+          <div
+            className={styles.thumb}
+            ref={refs.thumbRef}
+            onPointerDown={handlers.onThumbPointerDown}
+            onPointerMove={handlers.onThumbPointerMove}
+            onPointerUp={handlers.onThumbPointerUp}
+            onPointerCancel={handlers.onThumbPointerUp}
+          ></div>
         </div>
         <button
           className={styles.arrowButton}
           type="button"
           disabled={!state.canScrollDown}
+          tabIndex={-1}
         >
           <ArrowDownIcon />
         </button>

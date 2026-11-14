@@ -74,12 +74,50 @@ export function useCustomScroller() {
     return () => resizeObserver.disconnect();
   }, [sync]);
 
+  const handleThumbPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    const viewport = viewportRef.current;
+    if (!viewport || getMaxScrollTop(viewport) <= 0) return;
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragStartRef.current = {
+      pointerY: event.clientY,
+      scrollTop: viewport.scrollTop,
+    };
+  };
+
+  const handleThumbPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const dragStart = dragStartRef.current;
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    const thumb = thumbRef.current;
+    if (!dragStart || !viewport || !track || !thumb) return;
+
+    const maxThumbTop = track.clientHeight - thumb.offsetHeight;
+    if (maxThumbTop <= 0) return;
+
+    const scrollDelta =
+      ((event.clientY - dragStart.pointerY) / maxThumbTop) *
+      getMaxScrollTop(viewport);
+    viewport.scrollTo({ top: dragStart.scrollTop + scrollDelta });
+  };
+
+  const handleThumbPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    dragStartRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
   return {
     viewportId,
     state: { isScrollable, canScrollUp, canScrollDown },
     refs: { viewportRef, contentRef, trackRef, thumbRef },
     handlers: {
       onScroll: sync,
+      onThumbPointerDown: handleThumbPointerDown,
+      onThumbPointerMove: handleThumbPointerMove,
+      onThumbPointerUp: handleThumbPointerUp,
     },
   };
 }
