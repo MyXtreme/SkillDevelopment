@@ -10,6 +10,8 @@ import { clamp } from "../../shared/utils";
 
 const MIN_THUMB_HEIGHT = 24;
 const EDGE_TOLERANCE = 1;
+const HOLD_SPEED = 500;
+const MAX_FRAME_MS = 50;
 
 interface DragStart {
   pointerY: number;
@@ -26,6 +28,7 @@ export function useCustomScroller() {
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<DragStart | null>(null);
+  const holdFrameRef = useRef<number | null>(null);
 
   const [isScrollable, setIsScrollable] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);
@@ -74,6 +77,41 @@ export function useCustomScroller() {
     return () => resizeObserver.disconnect();
   }, [sync]);
 
+  const stopHoldScroll = useCallback(() => {
+    if (holdFrameRef.current === null) return;
+    cancelAnimationFrame(holdFrameRef.current);
+    holdFrameRef.current = null;
+  }, []);
+
+  useEffect(() => stopHoldScroll, [stopHoldScroll]);
+
+  const createArrowHandlers = (direction: 1 | -1) => ({
+    onPointerDown: (event: PointerEvent<HTMLButtonElement>) => {
+      const viewport = viewportRef.current;
+      if (!viewport || event.button !== 0) return;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      stopHoldScroll();
+
+      let lastTime = performance.now();
+      const tick = (now: number) => {
+        const elapsed = Math.min(now - lastTime, MAX_FRAME_MS);
+        lastTime = now;
+        const before = viewport.scrollTop;
+        viewport.scrollTop = before + (direction * HOLD_SPEED * elapsed) / 1000;
+
+        if (viewport.scrollTop === before) {
+          holdFrameRef.current = null;
+          return;
+        }
+        holdFrameRef.current = requestAnimationFrame(tick);
+      };
+      holdFrameRef.current = requestAnimationFrame(tick);
+    },
+    onPointerUp: stopHoldScroll,
+    onpointercancel: stopHoldScroll,
+    onlostpointercapture: stopHoldScroll,
+  });
+
   const handleThumbPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const viewport = viewportRef.current;
     if (!viewport || getMaxScrollTop(viewport) <= 0) return;
@@ -115,6 +153,8 @@ export function useCustomScroller() {
     refs: { viewportRef, contentRef, trackRef, thumbRef },
     handlers: {
       onScroll: sync,
+      upButton: createArrowHandlers(-1),
+      downButton: createArrowHandlers(1),
       onThumbPointerDown: handleThumbPointerDown,
       onThumbPointerMove: handleThumbPointerMove,
       onThumbPointerUp: handleThumbPointerUp,

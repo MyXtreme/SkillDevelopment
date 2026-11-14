@@ -55,6 +55,7 @@ export function CustomScroller({
           type="button"
           disabled={!state.canScrollUp}
           tabIndex={-1}
+          {...handlers.upButton}
         >
           <ArrowUpIcon />
         </button>
@@ -74,6 +75,7 @@ export function CustomScroller({
           type="button"
           disabled={!state.canScrollDown}
           tabIndex={-1}
+          {...handlers.downButton}
         >
           <ArrowDownIcon />
         </button>
