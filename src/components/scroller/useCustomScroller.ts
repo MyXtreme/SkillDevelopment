@@ -18,10 +18,19 @@ interface DragStart {
   scrollTop: number;
 }
 
+interface UseCustomScrollerOptions {
+  autoScroll?: boolean;
+}
+
 const getMaxScrollTop = (viewport: HTMLElement) =>
   Math.max(viewport.scrollHeight - viewport.clientHeight, 0);
 
-export function useCustomScroller() {
+const prefersReducedMotion = () =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+export function useCustomScroller({
+  autoScroll = false,
+}: UseCustomScrollerOptions = {}) {
   const viewportId = useId();
   const viewportRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -29,6 +38,10 @@ export function useCustomScroller() {
   const thumbRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<DragStart | null>(null);
   const holdFrameRef = useRef<number | null>(null);
+
+  const autoScrollRef = useRef(autoScroll);
+  const isPinnedRef = useRef(true);
+  const isInteractingRef = useRef(false);
 
   const [isScrollable, setIsScrollable] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);
@@ -63,25 +76,62 @@ export function useCustomScroller() {
     setCanScrollDown(scrollable && maxScrollTop - scrollTop > EDGE_TOLERANCE);
   }, []);
 
+  const followIfPinned = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    if (!autoScrollRef.current) return;
+    if (!isPinnedRef.current || isInteractingRef.current) return;
+    viewport.scrollTop = viewport.scrollHeight;
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (viewport) {
+      isPinnedRef.current =
+        getMaxScrollTop(viewport) - viewport.scrollTop <= EDGE_TOLERANCE;
+    }
+    sync();
+  }, [sync]);
+
+  const finishInteraction = useCallback(() => {
+    isInteractingRef.current = false;
+    followIfPinned();
+  }, [followIfPinned]);
+
+  useEffect(() => {
+    autoScrollRef.current = autoScroll;
+    followIfPinned();
+  }, [autoScroll, followIfPinned]);
+
   useEffect(() => {
     const viewport = viewportRef.current;
     const content = contentRef.current;
     const track = trackRef.current;
     if (!viewport || !content || !track) return;
 
-    sync();
-    const resizeObserver = new ResizeObserver(sync);
+    const handleResize = () => {
+      followIfPinned();
+      sync();
+    };
+
+    handleResize();
+    const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(viewport);
     resizeObserver.observe(content);
     resizeObserver.observe(track);
     return () => resizeObserver.disconnect();
-  }, [sync]);
+  }, [followIfPinned, sync]);
 
   const stopHoldScroll = useCallback(() => {
     if (holdFrameRef.current === null) return;
     cancelAnimationFrame(holdFrameRef.current);
     holdFrameRef.current = null;
   }, []);
+
+  const endHold = useCallback(() => {
+    stopHoldScroll();
+    finishInteraction();
+  }, [stopHoldScroll, finishInteraction]);
 
   useEffect(() => stopHoldScroll, [stopHoldScroll]);
 
@@ -91,6 +141,7 @@ export function useCustomScroller() {
       if (!viewport || event.button !== 0) return;
       event.currentTarget.setPointerCapture(event.pointerId);
       stopHoldScroll();
+      isInteractingRef.current = true;
 
       let lastTime = performance.now();
       const tick = (now: number) => {
@@ -107,9 +158,9 @@ export function useCustomScroller() {
       };
       holdFrameRef.current = requestAnimationFrame(tick);
     },
-    onPointerUp: stopHoldScroll,
-    onpointercancel: stopHoldScroll,
-    onlostpointercapture: stopHoldScroll,
+    onPointerUp: endHold,
+    onPointerCancel: endHold,
+    onLostPointerCapture: endHold,
   });
 
   const handleTrackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -129,8 +180,15 @@ export function useCustomScroller() {
       0,
       maxThumbTop,
     );
+    const top = (thumbTop / maxThumbTop) * getMaxScrollTop(viewport);
+
+    if (top < viewport.scrollTop - EDGE_TOLERANCE) {
+      isPinnedRef.current = false;
+    }
+
     viewport.scrollTo({
-      top: (thumbTop / maxThumbTop) * getMaxScrollTop(viewport),
+      top,
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
     });
   };
 
@@ -140,6 +198,7 @@ export function useCustomScroller() {
 
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
+    isInteractingRef.current = true;
     dragStartRef.current = {
       pointerY: event.clientY,
       scrollTop: viewport.scrollTop,
@@ -167,6 +226,7 @@ export function useCustomScroller() {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+    finishInteraction();
   };
 
   return {
@@ -174,7 +234,7 @@ export function useCustomScroller() {
     state: { isScrollable, canScrollUp, canScrollDown },
     refs: { viewportRef, contentRef, trackRef, thumbRef },
     handlers: {
-      onScroll: sync,
+      onScroll: handleScroll,
       upButton: createArrowHandlers(-1),
       downButton: createArrowHandlers(1),
       onThumbPointerDown: handleThumbPointerDown,

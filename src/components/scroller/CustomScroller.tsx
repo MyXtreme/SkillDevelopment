@@ -20,16 +20,20 @@ function ArrowDownIcon() {
 
 interface CustomScrollerProps {
   children: ReactNode;
-  className?: String;
-  ariaLabel?: String;
+  className?: string;
+  ariaLabel?: string;
+  autoScroll?: boolean;
 }
 
 export function CustomScroller({
   children,
   className,
   ariaLabel = "Scrollable content",
+  autoScroll = false,
 }: CustomScrollerProps) {
-  const { viewportId, refs, state, handlers } = useCustomScroller();
+  const { viewportId, refs, state, handlers } = useCustomScroller({
+    autoScroll,
+  });
 
   return (
     <div className={styles.scroller}>
@@ -74,6 +78,7 @@ export function CustomScroller({
             onPointerCancel={handlers.onThumbPointerUp}
           ></div>
         </div>
+
         <button
           className={styles.arrowButton}
           type="button"

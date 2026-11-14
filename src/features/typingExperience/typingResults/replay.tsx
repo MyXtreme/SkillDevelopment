@@ -34,6 +34,7 @@ export function Replay({ frames }: ReplayProps) {
       <CustomScroller
         className={resultStyles.replayViewport}
         ariaLabel="Typing replay"
+        autoScroll
       >
         <div className={resultStyles.replayText}>
           {currentText}
