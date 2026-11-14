@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTypingContext } from "../context/TypingContext";
-import { randomTexGeneration } from "../utils/textGenerationUtils";
+import { randomTexGeneration } from "../typingUtils/textGenerationUtils";
 
 export function useEngineText() {
   const { typingState, typingAction } = useTypingContext();

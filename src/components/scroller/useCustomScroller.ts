@@ -1,0 +1,246 @@
+import {
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  useId,
+  type PointerEvent,
+} from "react";
+import { clamp } from "../../shared/utils";
+
+const MIN_THUMB_HEIGHT = 24;
+const EDGE_TOLERANCE = 1;
+const HOLD_SPEED = 500;
+const MAX_FRAME_MS = 50;
+
+interface DragStart {
+  pointerY: number;
+  scrollTop: number;
+}
+
+interface UseCustomScrollerOptions {
+  autoScroll?: boolean;
+}
+
+const getMaxScrollTop = (viewport: HTMLElement) =>
+  Math.max(viewport.scrollHeight - viewport.clientHeight, 0);
+
+const prefersReducedMotion = () =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+export function useCustomScroller({
+  autoScroll = false,
+}: UseCustomScrollerOptions = {}) {
+  const viewportId = useId();
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<DragStart | null>(null);
+  const holdFrameRef = useRef<number | null>(null);
+
+  const autoScrollRef = useRef(autoScroll);
+  const isPinnedRef = useRef(true);
+  const isInteractingRef = useRef(false);
+
+  const [isScrollable, setIsScrollable] = useState(false);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+
+  const sync = useCallback(() => {
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    const thumb = thumbRef.current;
+    if (!viewport || !track || !thumb) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = viewport;
+    const maxScrollTop = getMaxScrollTop(viewport);
+    const trackHeight = track.clientHeight;
+    const scrollable = maxScrollTop > 0 && trackHeight > 0;
+
+    const thumbHeight = scrollable
+      ? clamp(
+          (trackHeight * clientHeight) / scrollHeight,
+          Math.min(MIN_THUMB_HEIGHT, trackHeight),
+          trackHeight,
+        )
+      : trackHeight;
+    const maxThumbTop = trackHeight - thumbHeight;
+    const thumbTop = scrollable ? (scrollTop / maxScrollTop) * maxThumbTop : 0;
+
+    thumb.style.height = `${thumbHeight}px`;
+    thumb.style.transform = `translateY(${thumbTop}px)`;
+
+    setIsScrollable(scrollable);
+    setCanScrollUp(scrollable && scrollTop > EDGE_TOLERANCE);
+    setCanScrollDown(scrollable && maxScrollTop - scrollTop > EDGE_TOLERANCE);
+  }, []);
+
+  const followIfPinned = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    if (!autoScrollRef.current) return;
+    if (!isPinnedRef.current || isInteractingRef.current) return;
+    viewport.scrollTop = viewport.scrollHeight;
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (viewport) {
+      isPinnedRef.current =
+        getMaxScrollTop(viewport) - viewport.scrollTop <= EDGE_TOLERANCE;
+    }
+    sync();
+  }, [sync]);
+
+  const finishInteraction = useCallback(() => {
+    isInteractingRef.current = false;
+    followIfPinned();
+  }, [followIfPinned]);
+
+  useEffect(() => {
+    autoScrollRef.current = autoScroll;
+    followIfPinned();
+  }, [autoScroll, followIfPinned]);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    const content = contentRef.current;
+    const track = trackRef.current;
+    if (!viewport || !content || !track) return;
+
+    const handleResize = () => {
+      followIfPinned();
+      sync();
+    };
+
+    handleResize();
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(viewport);
+    resizeObserver.observe(content);
+    resizeObserver.observe(track);
+    return () => resizeObserver.disconnect();
+  }, [followIfPinned, sync]);
+
+  const stopHoldScroll = useCallback(() => {
+    if (holdFrameRef.current === null) return;
+    cancelAnimationFrame(holdFrameRef.current);
+    holdFrameRef.current = null;
+  }, []);
+
+  const endHold = useCallback(() => {
+    stopHoldScroll();
+    finishInteraction();
+  }, [stopHoldScroll, finishInteraction]);
+
+  useEffect(() => stopHoldScroll, [stopHoldScroll]);
+
+  const createArrowHandlers = (direction: 1 | -1) => ({
+    onPointerDown: (event: PointerEvent<HTMLButtonElement>) => {
+      const viewport = viewportRef.current;
+      if (!viewport || event.button !== 0) return;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      stopHoldScroll();
+      isInteractingRef.current = true;
+
+      let lastTime = performance.now();
+      const tick = (now: number) => {
+        const elapsed = Math.min(now - lastTime, MAX_FRAME_MS);
+        lastTime = now;
+        const before = viewport.scrollTop;
+        viewport.scrollTop = before + (direction * HOLD_SPEED * elapsed) / 1000;
+
+        if (viewport.scrollTop === before) {
+          holdFrameRef.current = null;
+          return;
+        }
+        holdFrameRef.current = requestAnimationFrame(tick);
+      };
+      holdFrameRef.current = requestAnimationFrame(tick);
+    },
+    onPointerUp: endHold,
+    onPointerCancel: endHold,
+    onLostPointerCapture: endHold,
+  });
+
+  const handleTrackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    const thumb = thumbRef.current;
+    if (!viewport || !track || !thumb) return;
+
+    const maxThumbTop = track.clientHeight - thumb.offsetHeight;
+    if (maxThumbTop <= 0) return;
+
+    const trackTop = track.getBoundingClientRect().top;
+    const thumbTop = clamp(
+      event.clientY - trackTop - thumb.offsetHeight / 2,
+      0,
+      maxThumbTop,
+    );
+    const top = (thumbTop / maxThumbTop) * getMaxScrollTop(viewport);
+
+    if (top < viewport.scrollTop - EDGE_TOLERANCE) {
+      isPinnedRef.current = false;
+    }
+
+    viewport.scrollTo({
+      top,
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+    });
+  };
+
+  const handleThumbPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    const viewport = viewportRef.current;
+    if (!viewport || getMaxScrollTop(viewport) <= 0) return;
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    isInteractingRef.current = true;
+    dragStartRef.current = {
+      pointerY: event.clientY,
+      scrollTop: viewport.scrollTop,
+    };
+  };
+
+  const handleThumbPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const dragStart = dragStartRef.current;
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    const thumb = thumbRef.current;
+    if (!dragStart || !viewport || !track || !thumb) return;
+
+    const maxThumbTop = track.clientHeight - thumb.offsetHeight;
+    if (maxThumbTop <= 0) return;
+
+    const scrollDelta =
+      ((event.clientY - dragStart.pointerY) / maxThumbTop) *
+      getMaxScrollTop(viewport);
+    viewport.scrollTo({ top: dragStart.scrollTop + scrollDelta });
+  };
+
+  const handleThumbPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    dragStartRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    finishInteraction();
+  };
+
+  return {
+    viewportId,
+    state: { isScrollable, canScrollUp, canScrollDown },
+    refs: { viewportRef, contentRef, trackRef, thumbRef },
+    handlers: {
+      onScroll: handleScroll,
+      upButton: createArrowHandlers(-1),
+      downButton: createArrowHandlers(1),
+      onThumbPointerDown: handleThumbPointerDown,
+      onThumbPointerMove: handleThumbPointerMove,
+      onThumbPointerUp: handleThumbPointerUp,
+      onTrackPointerDown: handleTrackPointerDown,
+    },
+  };
+}

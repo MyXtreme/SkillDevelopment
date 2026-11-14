@@ -4,6 +4,7 @@ import minimapStyles from "../components/typing-results.module.css";
 
 interface AccuracyMinimapProps {
   characterStates: CharState[];
+  showUntypedCharacters: boolean;
 }
 
 const mistakeClassByType: Record<MistakeType, string> = {
@@ -22,11 +23,18 @@ function displayCharacter(character: string): string {
   return character;
 }
 
-export function AccuracyMinimap({ characterStates }: AccuracyMinimapProps) {
+export function AccuracyMinimap({
+  characterStates,
+  showUntypedCharacters,
+}: AccuracyMinimapProps) {
+  const visibleCharacters = showUntypedCharacters
+    ? characterStates
+    : characterStates.filter((character) => character.typed !== null);
+
   return (
     <div className={minimapStyles.minimap} aria-label="Typing accuracy minimap">
       <div className={minimapStyles.minimapText}>
-        {characterStates.map((character) => {
+        {visibleCharacters.map((character) => {
           const characterClass =
             character.expected === " "
               ? minimapStyles.minimapSpace

@@ -43,6 +43,8 @@ export function useTypingSessionResults() {
     speedSeries,
     characterStates,
     replay,
+    showUntypedCharacters:
+      session.header.configuration.completeOn === "textEnd",
     error: validation.error ?? null,
     message: validation.message ?? null,
   };
