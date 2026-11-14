@@ -23,26 +23,46 @@ interface CustomScrollerProps {
   className?: String;
   ariaLabel?: String;
 }
+
 export function CustomScroller({
   children,
   className,
-  ariaLabel,
+  ariaLabel = "Scrollable content",
 }: CustomScrollerProps) {
-  const { refs, state, handlers } = useCustomScroller();
+  const { viewportId, refs, state, handlers } = useCustomScroller();
   return (
     <div className={styles.scroller}>
-      <div ref={refs.viewportRef} onScroll={handlers.onScroll}>
+      <div
+        id={viewportId}
+        ref={refs.viewportRef}
+        className={[styles.viewport, className].filter(Boolean).join(" ")}
+        aria-labe={ariaLabel}
+        onScroll={handlers.onScroll}
+      >
         <div ref={refs.contentRef}>{children}</div>
       </div>
 
-      <div className={styles.controls} data-visible={state.isScrollable}>
-        <button className={styles.arrowButton}>
+      <div
+        className={styles.controls}
+        aria-hidden="true"
+        data-visible={state.isScrollable}
+      >
+        <button
+          className={styles.arrowButton}
+          type="button"
+          disabled={!state.canScrollUp}
+        >
           <ArrowUpIcon />
         </button>
+
         <div className={styles.track} ref={refs.trackRef}>
           <div className={styles.thumb} ref={refs.thumbRef}></div>
         </div>
-        <button className={styles.arrowButton}>
+        <button
+          className={styles.arrowButton}
+          type="button"
+          disabled={!state.canScrollDown}
+        >
           <ArrowDownIcon />
         </button>
       </div>
