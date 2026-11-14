@@ -112,6 +112,28 @@ export function useCustomScroller() {
     onlostpointercapture: stopHoldScroll,
   });
 
+  const handleTrackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    const thumb = thumbRef.current;
+    if (!viewport || !track || !thumb) return;
+
+    const maxThumbTop = track.clientHeight - thumb.offsetHeight;
+    if (maxThumbTop <= 0) return;
+
+    const trackTop = track.getBoundingClientRect().top;
+    const thumbTop = clamp(
+      event.clientY - trackTop - thumb.offsetHeight / 2,
+      0,
+      maxThumbTop,
+    );
+    viewport.scrollTo({
+      top: (thumbTop / maxThumbTop) * getMaxScrollTop(viewport),
+    });
+  };
+
   const handleThumbPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const viewport = viewportRef.current;
     if (!viewport || getMaxScrollTop(viewport) <= 0) return;
@@ -158,6 +180,7 @@ export function useCustomScroller() {
       onThumbPointerDown: handleThumbPointerDown,
       onThumbPointerMove: handleThumbPointerMove,
       onThumbPointerUp: handleThumbPointerUp,
+      onTrackPointerDown: handleTrackPointerDown,
     },
   };
 }

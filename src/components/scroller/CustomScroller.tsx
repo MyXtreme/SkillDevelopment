@@ -60,7 +60,11 @@ export function CustomScroller({
           <ArrowUpIcon />
         </button>
 
-        <div className={styles.track} ref={refs.trackRef}>
+        <div
+          className={styles.track}
+          ref={refs.trackRef}
+          onPointerDown={handlers.onTrackPointerDown}
+        >
           <div
             className={styles.thumb}
             ref={refs.thumbRef}
