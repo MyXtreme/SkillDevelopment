@@ -43,7 +43,7 @@ export function CustomScroller({
         className={[styles.viewport, className].filter(Boolean).join(" ")}
         role="region"
         tabIndex={state.isScrollable ? 0 : -1}
-        aria-labe={ariaLabel}
+        aria-label={ariaLabel}
         onScroll={handlers.onScroll}
       >
         <div ref={refs.contentRef}>{children}</div>
