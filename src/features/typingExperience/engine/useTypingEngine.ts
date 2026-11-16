@@ -21,21 +21,18 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
 
   const typedDeltaRef = useRef("");
   const intervalIDRef = useRef<number | null>(null);
-  const startWallTimeRef = useRef<number | null>(null);
+  const endTimeoutIDRef = useRef<number | null>(null);
   const isTerminatingRef = useRef(false);
   const sessionRecorderRef = useRef(createTypingSessionRecorder(config));
   const pauseObserverRef = useRef(
-    createTypingPauseObserver(
-      () => Date.now() - (startWallTimeRef.current ?? Date.now()),
-      {
-        onAfkStart: () => {
-          typingAction.setEngagement("passive");
-        },
-        onResume: () => {
-          typingAction.setEngagement("active");
-        },
+    createTypingPauseObserver(() => sessionRecorderRef.current.getElapsedMs(), {
+      onAfkStart: () => {
+        typingAction.setEngagement("passive");
       },
-    ),
+      onResume: () => {
+        typingAction.setEngagement("active");
+      },
+    }),
   );
 
   const latest = useRef({
@@ -45,7 +42,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
     currentText,
     time,
   });
-
   useEffect(() => {
     latest.current = {
       engineStatus: typingState.status,
@@ -72,13 +68,20 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
     }
   }, [engineStatus, config.difficulty, config.completeOn, config.wordRange]);
 
+  const clearRunTimers = () => {
+    if (intervalIDRef.current !== null) clearInterval(intervalIDRef.current);
+    if (endTimeoutIDRef.current !== null) clearTimeout(endTimeoutIDRef.current);
+    intervalIDRef.current = null;
+    endTimeoutIDRef.current = null;
+  };
+
   const terminateEngineRun = useCallback(
     (reason: EndReason) => {
       if (isTerminatingRef.current) return;
-      if (!sessionRecorderRef.current || !sessionRecorderRef.current.recording)
-        return;
+      if (!sessionRecorderRef.current.recording) return;
 
       isTerminatingRef.current = true;
+      clearRunTimers();
 
       if (intervalIDRef.current) clearInterval(intervalIDRef.current);
       intervalIDRef.current = null;
@@ -97,6 +100,8 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
         typedDeltaRef.current = "";
       }
 
+      if (reason === "timeEnd") setTime(latest.current.config.duration);
+
       const pauseEvent = pauseObserverRef.current.stop();
       const finalSession = sessionRecorderRef.current.stop(
         reason,
@@ -110,6 +115,11 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
     },
     [typingAction, action],
   );
+
+  const terminateRef = useRef(terminateEngineRun);
+  useEffect(() => {
+    terminateRef.current = terminateEngineRun;
+  }, [terminateEngineRun]);
 
   const handleIncomingInput = useCallback(
     (e: any) => {
@@ -125,8 +135,18 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
         return;
       if (currentStatus === "finished") return;
 
+      const recorder = sessionRecorderRef.current;
+      if (
+        currentConfig.completeOn === "timeEnd" &&
+        recorder.recording &&
+        recorder.getElapsedMs() >= currentConfig.duration * 1000
+      ) {
+        terminateEngineRun("timeEnd");
+        return;
+      }
+
       const cursorIndex = activeTyped.length;
-      const shouldBreak = sessionRecorderRef.current.capture(
+      const shouldBreak = recorder.capture(
         key,
         activeText[cursorIndex],
         cursorIndex,
@@ -152,20 +172,8 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
           nextLength = activeTyped.length + 1;
 
           if (currentStatus === "idle") {
-            if (
-              sessionRecorderRef.current.typingSessionID === null &&
-              sessionRecorderRef.current === null
-            ) {
-              console.warn("created second session recorder");
-              sessionRecorderRef.current =
-                createTypingSessionRecorder(currentConfig);
-            }
-            sessionRecorderRef.current.start();
-            sessionRecorderRef.current.capture(
-              key,
-              activeText[cursorIndex],
-              cursorIndex,
-            );
+            recorder.start();
+            recorder.capture(key, activeText[cursorIndex], cursorIndex);
             pauseObserverRef.current.start();
             pauseObserverRef.current.recordActivity();
             isTerminatingRef.current = false;
@@ -203,39 +211,39 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
   useEffect(() => {
     if (engineStatus !== "running") return;
 
-    intervalIDRef.current = window.setInterval(() => {
-      let holdingTermination = false;
-      setTime((prev) => {
-        const nextTime = prev + 1;
-        if (
-          latest.current.config.completeOn === "timeEnd" &&
-          nextTime >= latest.current.config.duration
-        ) {
-          holdingTermination = true;
-          setTimeout(() => {
-            terminateEngineRun("timeEnd");
-          }, 0);
-        }
-        return nextTime;
-      });
+    const { config: runConfig } = latest.current;
 
-      if (holdingTermination) return;
+    if (runConfig.completeOn === "timeEnd") {
+      const remainingMs = Math.max(
+        0,
+        runConfig.duration * 1000 - sessionRecorderRef.current.getElapsedMs(),
+      );
+      endTimeoutIDRef.current = window.setTimeout(
+        () => terminateRef.current("timeEnd"),
+        remainingMs,
+      );
+    }
+
+    intervalIDRef.current = window.setInterval(() => {
+      const recorder = sessionRecorderRef.current;
+
+      if (!recorder.recording) return;
+
+      setTime(Math.floor(recorder.getElapsedMs() / 1000));
       const { typedText: curTyped, currentText: curOrig } = latest.current;
       const deltaLength = typedDeltaRef.current.length;
       const caretIndex = curTyped.length;
       const deltaStart = Math.max(0, caretIndex - deltaLength);
 
-      sessionRecorderRef.current.tick(
+      recorder.tick(
         curOrig.slice(deltaStart, caretIndex),
         typedDeltaRef.current,
       );
       typedDeltaRef.current = "";
     }, PERFORMANCE_THRESHOLDS.LOOP_TICK_INTERVAL_MS);
 
-    return () => {
-      if (intervalIDRef.current) clearInterval(intervalIDRef.current);
-    };
-  }, [engineStatus, terminateEngineRun]);
+    return clearRunTimers;
+  }, [engineStatus]);
 
   return { typedText, time };
 }

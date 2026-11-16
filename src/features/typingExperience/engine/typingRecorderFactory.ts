@@ -187,6 +187,9 @@ export function createTypingSessionRecorder(
     typingSessionID = crypto.randomUUID();
   };
 
+  const getElapsedMs = () =>
+    startTime === null ? 0 : performance.now() - startTime;
+
   const tick = (expectedTextSlice: string, typedTextSlice: string) => {
     if (
       startTime === null ||
@@ -330,6 +333,7 @@ export function createTypingSessionRecorder(
       return typingSessionID;
     },
     start,
+    getElapsedMs,
     tick,
     capture,
     stop,
