@@ -31,14 +31,25 @@ export interface ReplayFrame {
 
 export function analyzeSpeedSeries(session: TypingSession): SpeedPoint[] {
   const { timeLine } = session.body;
-  const points: SpeedPoint[] = new Array(timeLine.length);
+  const DIVISOR = PERFORMANCE_THRESHOLDS.CPM_TO_WPM_DIVISOR;
+  const MIN_GAP = PERFORMANCE_THRESHOLDS.MIN_POINT_GAP_S;
+  const points: SpeedPoint[] = [];
 
-  for (let i = 0; i < timeLine.length; i++) {
-    points[i] = {
-      t: timeLine[i].elapsedTimeMs / 1000,
-      wpm: timeLine[i].correctChars * 12,
-      raw: timeLine[i].totalChars * 12,
+  for (const tick of timeLine) {
+    if (tick.elapsedTimeMs <= 0) continue;
+    const minutes = tick.elapsedTimeMs / 60000;
+    const point: SpeedPoint = {
+      t: tick.elapsedTimeMs / 1000,
+      wpm: tick.correctChars / DIVISOR / minutes,
+      raw: tick.keyPresses / DIVISOR / minutes,
     };
+
+    const last = points.at(-1);
+    if (last && point.t - last.t < MIN_GAP) {
+      points[points.length - 1] = point;
+    } else {
+      points.push(point);
+    }
   }
   return points;
 }
@@ -93,7 +104,9 @@ export function analyzeReplay(session: TypingSession): ReplayFrame[] {
     frames.push({
       elapsedMs: event.elapsedMs,
       cursorIndex:
-        event.action === "delete" ? Math.max(0, cursorIndex - 1) : cursorIndex + 1,
+        event.action === "delete"
+          ? Math.max(0, cursorIndex - 1)
+          : cursorIndex + 1,
       key: event.key,
       action: event.action,
       text: text.join(""),
