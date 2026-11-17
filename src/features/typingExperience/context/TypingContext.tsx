@@ -1,4 +1,10 @@
-import { useState, useContext, createContext, type ReactNode } from "react";
+import {
+  useMemo,
+  useState,
+  useContext,
+  createContext,
+  type ReactNode,
+} from "react";
 import {
   DEFAULT_TYPING_CONFIG,
   DEFAULT_TYPING_SESSION,
@@ -35,6 +41,7 @@ export interface TimeLineSnapshot {
   deltaTimeMs: number;
   correctChars: number;
   totalChars: number;
+  keyPresses: number;
 }
 export type MistakeType =
   | "incorrect"
@@ -130,39 +137,32 @@ export function TypingProvider({ children }: { children: ReactNode }) {
     session: DEFAULT_TYPING_SESSION,
   });
 
-  const setActivity = (newActivity: TypingActivity) => {
-    setTypingState((prev) => ({ ...prev, activity: newActivity }));
-  };
-
-  const setStatus = (newStatus: TypingStatus) => {
-    setTypingState((prev) => ({ ...prev, status: newStatus }));
-  };
-
-  const setEngagement = (newEngagement: TypingEngagement) => {
-    setTypingState((prev) => ({ ...prev, engagement: newEngagement }));
-  };
-
-  const setConfig = (newConfig: TypingConfiguration) => {
-    setTypingState((prev) => ({ ...prev, config: newConfig }));
-  };
-
-  const setSession = (newSession: TypingSession) => {
-    setTypingState((prev) => ({ ...prev, session: newSession }));
-  };
-
-  const typingAction = {
-    setActivity,
-    setStatus,
-    setEngagement,
-    setConfig,
-    setSession,
-  };
-
-  return (
-    <TypingContext value={{ typingState, typingAction }}>
-      {children}
-    </TypingContext>
+  const typingAction = useMemo<TypingAction>(
+    () => ({
+      setActivity: (activity) =>
+        setTypingState((prev) =>
+          prev.activity === activity ? prev : { ...prev, activity },
+        ),
+      setStatus: (status) =>
+        setTypingState((prev) =>
+          prev.status === status ? prev : { ...prev, status },
+        ),
+      setEngagement: (engagement) =>
+        setTypingState((prev) =>
+          prev.engagement === engagement ? prev : { ...prev, engagement },
+        ),
+      setConfig: (config) => setTypingState((prev) => ({ ...prev, config })),
+      setSession: (session) => setTypingState((prev) => ({ ...prev, session })),
+    }),
+    [],
   );
+
+  const value = useMemo(
+    () => ({ typingState, typingAction }),
+    [typingState, typingAction],
+  );
+
+  return <TypingContext value={value}>{children}</TypingContext>;
 }
 
 export function useTypingContext() {
