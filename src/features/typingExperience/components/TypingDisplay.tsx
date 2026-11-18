@@ -8,6 +8,8 @@ import typingDisplayStyles from "./typing-display.module.css";
 import { Fragment } from "react/jsx-runtime";
 import { useTypingEngine } from "../engine/useTypingEngine";
 import { useEngineText } from "../engine/useEngineText";
+import { ProgressDisplay } from "./ProgressDisplay";
+import { useTestProgress } from "../hooks/useTypingProgress";
 
 export default function TypingDisplay() {
   const { typingState } = useTypingContext();
@@ -19,6 +21,13 @@ export default function TypingDisplay() {
 
   const tokens = generateTextTokens(currentText, typedText);
   const { scrollOffset, setSpanRef } = useAutoScroll(typedText.length);
+  const progress = useTestProgress({
+    completeOn: typingState.config.completeOn,
+    duration: typingState.config.duration,
+    elapsedSeconds: time,
+    typedLength: typedText.length,
+    text: currentText,
+  });
 
   const isRunning = typingState.status === "running";
   return (
@@ -28,7 +37,7 @@ export default function TypingDisplay() {
           "fade-out": !isRunning,
         })}
       >
-        {formatTimeTick(time)}
+        <ProgressDisplay progress={progress} />
       </div>
       <div className={typingDisplayStyles.typingArea}>
         <div
