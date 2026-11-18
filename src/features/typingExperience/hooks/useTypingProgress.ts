@@ -33,16 +33,21 @@ interface ProgressMeasure {
 
 export function findWordEnds(text: string): number[] {
   const ends: number[] = [];
-  let inSpace = false;
+  let inWord = false;
   for (let i = 0; i < text.length; i++) {
     let char = text[i];
-    let isCurrentSpace =
+    let isSpace =
       char === " " || char === "\t" || char === "\n" || char === "\r";
 
-    if (inSpace && !isCurrentSpace) {
+    if (!isSpace) {
+      inWord = true;
+    } else if (inWord) {
       ends.push(i);
+      inWord = false;
     }
-    inSpace = isCurrentSpace;
+  }
+  if (inWord) {
+    ends.push(text.length);
   }
   return ends;
 }
