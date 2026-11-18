@@ -6,6 +6,32 @@ import { useAppContext } from "../../../context/appContext";
 import useInputManager from "../../../hooks/useInputManager";
 import { createTypingPauseObserver } from "./typingObserverFactory";
 
+const useSecondTicker = (
+  active: boolean,
+  getElapsedMs: () => number,
+  onSecond: (second: number) => void,
+) => {
+  useEffect(() => {
+    if (!active) return;
+    let timeoutID: ReturnType<typeof setTimeout>;
+    let lastSecond = -1;
+
+    const update = () => {
+      const elapsedMs = getElapsedMs();
+      const second = Math.floor(elapsedMs / 1000);
+      if (second !== lastSecond) {
+        lastSecond = second;
+        onSecond(second);
+      }
+
+      timeoutID = setTimeout(update, 1000 - (elapsedMs % 1000) + 1);
+    };
+
+    update();
+    return () => clearTimeout(timeoutID);
+  }, [active, getElapsedMs, onSecond]);
+};
+
 interface EngineProps {
   currentText: string;
   onBufferLow: () => void;
@@ -18,102 +44,81 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
 
   const [typedText, setTypedText] = useState("");
   const [time, setTime] = useState(0);
+  const [recorder] = useState(() => createTypingSessionRecorder(config));
+  const [pauseObserver] = useState(() =>
+    createTypingPauseObserver(() => recorder.getElapsedMs(), {
+      onAfkStart: () => typingAction.setEngagement("passive"),
+      onResume: () => typingAction.setEngagement("active"),
+    }),
+  );
 
-  const typedDeltaRef = useRef("");
   const intervalIDRef = useRef<number | null>(null);
   const endTimeoutIDRef = useRef<number | null>(null);
   const isTerminatingRef = useRef(false);
-  const sessionRecorderRef = useRef(createTypingSessionRecorder(config));
-  const pauseObserverRef = useRef(
-    createTypingPauseObserver(() => sessionRecorderRef.current.getElapsedMs(), {
-      onAfkStart: () => {
-        typingAction.setEngagement("passive");
-      },
-      onResume: () => {
-        typingAction.setEngagement("active");
-      },
-    }),
-  );
 
   const latest = useRef({
     engineStatus: typingState.status,
     config: typingState.config,
     typedText,
     currentText,
-    time,
+    onBufferLow,
   });
+
   useEffect(() => {
     latest.current = {
       engineStatus: typingState.status,
       config: typingState.config,
       typedText,
       currentText,
-      time,
+      onBufferLow,
     };
-  }, [typingState.status, typingState.config, typedText, currentText, time]);
+  }, [
+    typingState.status,
+    typingState.config,
+    typedText,
+    currentText,
+    onBufferLow,
+  ]);
 
+  //When engine idle
   useEffect(() => {
     if (engineStatus === "idle") {
       setTime(0);
       setTypedText("");
-      typedDeltaRef.current = "";
-    }
-  }, [engineStatus]);
-
-  useEffect(() => {
-    if (engineStatus === "idle") {
-      setTime(0);
-      setTypedText("");
-      typedDeltaRef.current = "";
     }
   }, [engineStatus, config.difficulty, config.completeOn, config.wordRange]);
 
-  const clearRunTimers = () => {
+  const clearRunTimers = useCallback(() => {
     if (intervalIDRef.current !== null) clearInterval(intervalIDRef.current);
     if (endTimeoutIDRef.current !== null) clearTimeout(endTimeoutIDRef.current);
     intervalIDRef.current = null;
     endTimeoutIDRef.current = null;
-  };
+  }, []);
 
   const terminateEngineRun = useCallback(
-    (reason: EndReason) => {
+    (reason: EndReason, typedOverride?: string) => {
       if (isTerminatingRef.current) return;
-      if (!sessionRecorderRef.current.recording) return;
+      if (!recorder.recording) return;
 
       isTerminatingRef.current = true;
       clearRunTimers();
 
-      if (intervalIDRef.current) clearInterval(intervalIDRef.current);
-      intervalIDRef.current = null;
-
-      const { typedText: curTyped, currentText: curOrig } = latest.current;
-      const caretIndex = curTyped.length;
-      if (typedDeltaRef.current.length > 0) {
-        const deltaStart = Math.max(
-          0,
-          caretIndex - typedDeltaRef.current.length,
-        );
-        sessionRecorderRef.current.tick(
-          curOrig.slice(deltaStart, caretIndex),
-          typedDeltaRef.current,
-        );
-        typedDeltaRef.current = "";
-      }
+      recorder.tick();
 
       if (reason === "timeEnd") setTime(latest.current.config.duration);
 
-      const pauseEvent = pauseObserverRef.current.stop();
-      const finalSession = sessionRecorderRef.current.stop(
+      const pauseEvent = pauseObserver.stop();
+      const finalSession = recorder.stop(
         reason,
         latest.current.currentText,
-        latest.current.typedText,
+        typedOverride ?? latest.current.typedText,
         pauseEvent,
       );
       typingAction.setSession(finalSession);
       typingAction.setStatus("finished");
       action.changeLayoutMode("normal");
     },
-    [typingAction, action],
+    [typingAction, action, recorder, pauseObserver, clearRunTimers],
   );
 
   const terminateRef = useRef(terminateEngineRun);
@@ -131,11 +136,12 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
         typedText: activeTyped,
       } = latest.current;
 
-      if (ctrlKey || altKey || metaKey || key === "Escape" || key === "Tab")
-        return;
       if (currentStatus === "finished") return;
+      if (ctrlKey || altKey || metaKey) return;
 
-      const recorder = sessionRecorderRef.current;
+      const isBackspace = key === "Backspace";
+      if (!isBackspace && [...key].length !== 1) return;
+
       if (
         currentConfig.completeOn === "timeEnd" &&
         recorder.recording &&
@@ -151,62 +157,70 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
         activeText[cursorIndex],
         cursorIndex,
       );
-      pauseObserverRef.current.recordActivity();
-      if (shouldBreak) {
-        return;
-      }
-      if (currentStatus === "idle" || currentStatus === "running") {
-        let nextLength = activeTyped.length;
+      pauseObserver.recordActivity();
+      if (shouldBreak) return;
 
-        if (key === "Backspace") {
-          e.preventDefault();
-          if (currentStatus === "idle") return;
+      if (currentStatus !== "idle" && currentStatus !== "running") return;
 
-          nextLength = Math.max(0, activeTyped.length - 1);
+      let nextLength = activeTyped.length;
 
-          if (cursorIndex <= 0) return;
-          setTypedText((prev) => prev.slice(0, -1));
-          typedDeltaRef.current = typedDeltaRef.current.slice(0, -1);
-        } else if (key.length === 1 || key === " ") {
-          e.preventDefault();
-          nextLength = activeTyped.length + 1;
+      if (isBackspace) {
+        e.preventDefault();
+        if (currentStatus === "idle") return;
+        if (cursorIndex <= 0) return;
 
-          if (currentStatus === "idle") {
-            recorder.start();
-            recorder.capture(key, activeText[cursorIndex], cursorIndex);
-            pauseObserverRef.current.start();
-            pauseObserverRef.current.recordActivity();
-            isTerminatingRef.current = false;
-            typingAction.setStatus("running");
-            action.changeLayoutMode("focused");
-          }
+        nextLength = nextLength - 1;
+        setTypedText((prev) => prev.slice(0, -1));
+      } else {
+        e.preventDefault();
+        nextLength = activeTyped.length + 1;
 
-          const charToAppend = key === " " ? " " : key;
-          setTypedText((prev) => prev + charToAppend);
-          typedDeltaRef.current += charToAppend;
-
-          if (
-            currentConfig.completeOn === "textEnd" &&
-            nextLength >= activeText.length
-          ) {
-            terminateEngineRun("textEnd");
-          }
+        if (currentStatus === "idle") {
+          setTime(0);
+          setTypedText("");
+          recorder.start();
+          recorder.capture(key, activeText[cursorIndex], cursorIndex);
+          pauseObserver.start();
+          pauseObserver.recordActivity();
+          isTerminatingRef.current = false;
+          typingAction.setStatus("running");
+          action.changeLayoutMode("focused");
         }
 
-        if (currentConfig.completeOn === "timeEnd") {
-          const remainingChars = activeText.length - nextLength;
-          if (
-            remainingChars <= PERFORMANCE_THRESHOLDS.REMAINING_BUFFER_THRESHOLD
-          ) {
-            onBufferLow();
-          }
+        setTypedText((prev) => prev + key);
+
+        if (
+          currentConfig.completeOn === "textEnd" &&
+          nextLength >= activeText.length
+        ) {
+          terminateEngineRun("textEnd", activeTyped + key);
+        }
+      }
+
+      if (currentConfig.completeOn === "timeEnd") {
+        const remainingChars = activeText.length - nextLength;
+        if (
+          remainingChars <= PERFORMANCE_THRESHOLDS.REMAINING_BUFFER_THRESHOLD
+        ) {
+          latest.current.onBufferLow();
         }
       }
     },
-    [typingAction, action, terminateEngineRun],
+    [typingAction, action, terminateEngineRun, recorder, pauseObserver],
   );
 
   useInputManager({ onInputReceive: handleIncomingInput });
+
+  const synctTime = useCallback(
+    (seconds: number) => {
+      if (recorder.recording) {
+        setTime(seconds);
+      }
+    },
+    [recorder],
+  );
+
+  useSecondTicker(engineStatus === "running", recorder.getElapsedMs, synctTime);
 
   useEffect(() => {
     if (engineStatus !== "running") return;
@@ -216,7 +230,7 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
     if (runConfig.completeOn === "timeEnd") {
       const remainingMs = Math.max(
         0,
-        runConfig.duration * 1000 - sessionRecorderRef.current.getElapsedMs(),
+        runConfig.duration * 1000 - recorder.getElapsedMs(),
       );
       endTimeoutIDRef.current = window.setTimeout(
         () => terminateRef.current("timeEnd"),
@@ -225,25 +239,12 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
     }
 
     intervalIDRef.current = window.setInterval(() => {
-      const recorder = sessionRecorderRef.current;
-
       if (!recorder.recording) return;
-
-      setTime(Math.floor(recorder.getElapsedMs() / 1000));
-      const { typedText: curTyped, currentText: curOrig } = latest.current;
-      const deltaLength = typedDeltaRef.current.length;
-      const caretIndex = curTyped.length;
-      const deltaStart = Math.max(0, caretIndex - deltaLength);
-
-      recorder.tick(
-        curOrig.slice(deltaStart, caretIndex),
-        typedDeltaRef.current,
-      );
-      typedDeltaRef.current = "";
+      recorder.tick();
     }, PERFORMANCE_THRESHOLDS.LOOP_TICK_INTERVAL_MS);
 
     return clearRunTimers;
-  }, [engineStatus]);
+  }, [engineStatus, recorder, clearRunTimers]);
 
   return { typedText, time };
 }

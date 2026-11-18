@@ -21,6 +21,8 @@ interface ProgressSnapshot {
   correctChars: number;
   incorrectChars: number;
 }
+
+//No more need locally, could be used outside file for scanning and checking of text
 export function evaluateText(
   expectedTextSlice: string,
   typedTextSlice: string,
@@ -73,6 +75,18 @@ export const initialStreakState = (): MistakeStreakState => ({
   lastStrokeCorrect: true,
   lastIncorrectChar: null,
   consecutiveErrorCount: 0,
+});
+
+export const createSummary = (): TypingSessionSummary => ({
+  net: {
+    totalChars: 0,
+    correctChars: 0,
+    incorrectChars: 0,
+  },
+  gross: {
+    totalKeyPresses: 0,
+    totalBackspaces: 0,
+  },
 });
 
 export interface ClassifyResult {
@@ -144,6 +158,7 @@ export function createTypingSessionRecorder(
   let timeLine: TimeLineSnapshot[] = [];
   let mistakeEvent: Mistake[] = [];
   let keyEvent: KeyStroke[] = [];
+  let typedCorrectness: boolean[] = [];
 
   let startTime: number | null = null;
   let startWallTime: number | null = null;
@@ -152,17 +167,7 @@ export function createTypingSessionRecorder(
   let recording = false;
 
   let streakState = initialStreakState();
-  const summary: TypingSessionSummary = {
-    net: {
-      totalChars: 0,
-      correctChars: 0,
-      incorrectChars: 0,
-    },
-    gross: {
-      totalKeyPresses: 0,
-      totalBackspaces: 0,
-    },
-  };
+  let summary = createSummary();
 
   let sessionHeader: TypingSessionHeader = { ...DEFAULT_TYPING_SESSION.header };
   if (sessionConfig) sessionHeader.configuration = sessionConfig;
@@ -180,17 +185,19 @@ export function createTypingSessionRecorder(
     startWallTime = Date.now();
     recording = true;
     streakState = initialStreakState();
+    summary = createSummary();
 
-    timeLine.length = 0;
-    mistakeEvent.length = 0;
-    keyEvent.length = 0;
+    timeLine = [];
+    mistakeEvent = [];
+    keyEvent = [];
+    typedCorrectness = [];
     typingSessionID = crypto.randomUUID();
   };
 
   const getElapsedMs = () =>
     startTime === null ? 0 : performance.now() - startTime;
 
-  const tick = (expectedTextSlice: string, typedTextSlice: string) => {
+  const tick = () => {
     if (
       startTime === null ||
       lastTickTime === null ||
@@ -204,17 +211,13 @@ export function createTypingSessionRecorder(
     const totalElapsedTimeMs = now - startTime;
     const deltaTimeMs = now - lastTickTime;
     lastTickTime = now;
-    const { totalChars, correctChars } = evaluateText(
-      expectedTextSlice,
-      typedTextSlice,
-    );
-
     const timeLineSnapshot: TimeLineSnapshot = {
       timeStamp: Date.now(),
       elapsedTimeMs: Math.round(totalElapsedTimeMs),
       deltaTimeMs,
-      correctChars,
-      totalChars,
+      correctChars: summary.net.correctChars,
+      totalChars: summary.net.totalChars,
+      keyPresses: summary.gross.totalKeyPresses,
     };
     timeLine.push(timeLineSnapshot);
 
@@ -231,7 +234,7 @@ export function createTypingSessionRecorder(
     }
 
     const now = Date.now();
-    const elapsedMs = now - (startWallTime ?? now);
+    const elapsedMs = Math.round(getElapsedMs());
     const action: KeyAction = key === "Backspace" ? "delete" : "insert";
 
     if (action === "delete") {
@@ -244,10 +247,10 @@ export function createTypingSessionRecorder(
         action,
         correct: null,
       });
-      if (cursorIndex > 0) {
-        streakState.lastStrokeCorrect
-          ? summary.net.correctChars--
-          : summary.net.incorrectChars--;
+
+      const wasCorrect = typedCorrectness.pop();
+      if (wasCorrect !== undefined) {
+        wasCorrect ? summary.net.correctChars-- : summary.net.incorrectChars--;
         summary.net.totalChars--;
       }
       streakState = initialStreakState();
@@ -262,6 +265,7 @@ export function createTypingSessionRecorder(
     streakState = nextState;
 
     const isCorrect = type === null;
+    summary.gross.totalKeyPresses++;
     if (!isCorrect) {
       mistakeEvent.push({
         elapsedMs,
@@ -272,8 +276,10 @@ export function createTypingSessionRecorder(
       });
     }
 
+    if (shouldBlock) return true;
+
+    typedCorrectness.push(isCorrect);
     isCorrect ? summary.net.correctChars++ : summary.net.incorrectChars++;
-    summary.gross.totalKeyPresses++;
     summary.net.totalChars++;
 
     keyEvent.push({
@@ -282,9 +288,9 @@ export function createTypingSessionRecorder(
       key,
       cursorIndex,
       action,
-      correct: type === null,
+      correct: isCorrect,
     });
-    return shouldBlock;
+    return false;
   };
 
   const stop = (
