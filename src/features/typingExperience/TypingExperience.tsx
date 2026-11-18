@@ -1,7 +1,7 @@
 import clsx from "clsx";
 
 import { useAppContext } from "../../context/appContext";
-import { TypingProvider, useTypingContext } from "./context/TypingContext";
+import { TypingProvider } from "./context/TypingContext";
 import Controls from "./components/Controls";
 import TypingDisplay from "./components/TypingDisplay";
 import TypingResults from "./components/TypingResults";

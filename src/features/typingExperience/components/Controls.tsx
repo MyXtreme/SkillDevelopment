@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { useAppContext } from "../../../context/appContext";
-import { useTypingContext } from "../context/TypingContext";
 import { type TypingConfiguration } from "../context/TypingContext";
 import { MEASURE_CONFIG_OPTIONS } from "../typingDefaults";
 
