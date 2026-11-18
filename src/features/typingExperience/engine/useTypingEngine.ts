@@ -6,6 +6,32 @@ import { useAppContext } from "../../../context/appContext";
 import useInputManager from "../../../hooks/useInputManager";
 import { createTypingPauseObserver } from "./typingObserverFactory";
 
+const useSecondTicker = (
+  active: boolean,
+  getElapsedMs: () => number,
+  onSecond: (second: number) => void,
+) => {
+  useEffect(() => {
+    if (!active) return;
+    let timeoutID: ReturnType<typeof setTimeout>;
+    let lastSecond = -1;
+
+    const update = () => {
+      const elapsedMs = getElapsedMs();
+      const second = Math.floor(elapsedMs / 1000);
+      if (second !== lastSecond) {
+        lastSecond = second;
+        onSecond(second);
+      }
+
+      timeoutID = setTimeout(update, 1000 - (elapsedMs % 1000) + 1);
+    };
+
+    update();
+    return () => clearTimeout(timeoutID);
+  }, [active, getElapsedMs, onSecond]);
+};
+
 interface EngineProps {
   currentText: string;
   onBufferLow: () => void;
@@ -35,7 +61,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
     config: typingState.config,
     typedText,
     currentText,
-    time,
     onBufferLow,
   });
 
@@ -45,7 +70,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
       config: typingState.config,
       typedText,
       currentText,
-      time,
       onBufferLow,
     };
   }, [
@@ -53,7 +77,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
     typingState.config,
     typedText,
     currentText,
-    time,
     onBufferLow,
   ]);
 
@@ -65,12 +88,12 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
     }
   }, [engineStatus, config.difficulty, config.completeOn, config.wordRange]);
 
-  const clearRunTimers = () => {
+  const clearRunTimers = useCallback(() => {
     if (intervalIDRef.current !== null) clearInterval(intervalIDRef.current);
     if (endTimeoutIDRef.current !== null) clearTimeout(endTimeoutIDRef.current);
     intervalIDRef.current = null;
     endTimeoutIDRef.current = null;
-  };
+  }, []);
 
   const terminateEngineRun = useCallback(
     (reason: EndReason, typedOverride?: string) => {
@@ -153,6 +176,8 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
         nextLength = activeTyped.length + 1;
 
         if (currentStatus === "idle") {
+          setTime(0);
+          setTypedText("");
           recorder.start();
           recorder.capture(key, activeText[cursorIndex], cursorIndex);
           pauseObserver.start();
@@ -168,7 +193,7 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
           currentConfig.completeOn === "textEnd" &&
           nextLength >= activeText.length
         ) {
-          terminateEngineRun("textEnd");
+          terminateEngineRun("textEnd", activeTyped + key);
         }
       }
 
@@ -177,7 +202,7 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
         if (
           remainingChars <= PERFORMANCE_THRESHOLDS.REMAINING_BUFFER_THRESHOLD
         ) {
-          onBufferLow();
+          latest.current.onBufferLow();
         }
       }
     },
@@ -185,6 +210,17 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
   );
 
   useInputManager({ onInputReceive: handleIncomingInput });
+
+  const synctTime = useCallback(
+    (seconds: number) => {
+      if (recorder.recording) {
+        setTime(seconds);
+      }
+    },
+    [recorder],
+  );
+
+  useSecondTicker(engineStatus === "running", recorder.getElapsedMs, synctTime);
 
   useEffect(() => {
     if (engineStatus !== "running") return;
@@ -204,8 +240,6 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
 
     intervalIDRef.current = window.setInterval(() => {
       if (!recorder.recording) return;
-
-      setTime(Math.floor(recorder.getElapsedMs() / 1000));
       recorder.tick();
     }, PERFORMANCE_THRESHOLDS.LOOP_TICK_INTERVAL_MS);
 
