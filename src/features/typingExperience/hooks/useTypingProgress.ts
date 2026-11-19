@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import type { CompletionType } from "../context/TypingContext";
 import { clamp, ratio } from "../../../shared/utils";
-import { textDefaultProps } from "recharts/types/component/Text";
 
 export type ProgressUnit = "seconds" | "words";
 
