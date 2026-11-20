@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTypingContext, type EndReason } from "../context/TypingContext";
-import { PERFORMANCE_THRESHOLDS } from "../typingDefaults";
+import { useTypingContext, type EndReason } from "../../context/TypingContext";
+import { PERFORMANCE_THRESHOLDS } from "../../typingDefaults";
 import { createTypingSessionRecorder } from "./typingRecorderFactory";
-import { useAppContext } from "../../../context/appContext";
-import useInputManager from "../../../hooks/useInputManager";
-import { createTypingPauseObserver } from "./typingObserverFactory";
+import { useAppContext } from "../../../../app/appContext";
+import useInputManager from "../../../../hooks/inputManager/useInputManager";
+import { createTypingPauseObserver } from "../typingObserverFactory";
 
 const useSecondTicker = (
   active: boolean,

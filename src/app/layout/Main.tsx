@@ -1,5 +1,5 @@
 import TypingExperience from "../../features/typingExperience/TypingExperience";
-import { useAppContext, type AppStateType } from "../../context/appContext";
+import { useAppContext, type AppStateType } from "../appContext";
 
 // TODO: Later the router should set dynamically the context variable
 

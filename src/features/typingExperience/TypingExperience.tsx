@@ -1,11 +1,11 @@
 import clsx from "clsx";
 
-import { useAppContext } from "../../context/appContext";
+import { useAppContext } from "../../app/appContext";
 import { TypingProvider } from "./context/TypingContext";
-import Controls from "./components/Controls";
-import TypingDisplay from "./components/TypingDisplay";
-import TypingResults from "./components/TypingResults";
-import { useTypingLifecycle } from "./hooks/useTypingLifecycle";
+import Controls from "./typingControls/Controls";
+import TypingDisplay from "./typingDisplay/TypingDisplay";
+import TypingResults from "./typingResults/TypingResults";
+import { useTypingLifecycle } from "./useTypingLifecycle";
 
 function TypingView() {
   const { app } = useAppContext();

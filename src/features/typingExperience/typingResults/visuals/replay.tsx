@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import type { ReplayFrame } from "./analyzer";
+import type { ReplayFrame } from "../analyzer";
 import resultStyles from "../components/typing-results.module.css";
-import { CustomScroller } from "../../../components/scroller/CustomScroller";
+import { CustomScroller } from "../../../../components/scroller/CustomScroller";
 
 interface ReplayProps {
   frames: ReplayFrame[];

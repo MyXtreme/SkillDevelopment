@@ -1,14 +1,14 @@
 import clsx from "clsx";
 import { useTypingContext } from "../context/TypingContext";
-import { useAutoScroll } from "../hooks/useAutoScroll";
+import { useAutoScroll } from "./useAutoScroll";
 import { generateTextTokens } from "../typingUtils/textHighlighter";
 
 import typingDisplayStyles from "./typing-display.module.css";
 import { Fragment } from "react/jsx-runtime";
-import { useTypingEngine } from "../engine/useTypingEngine";
-import { useEngineText } from "../engine/useEngineText";
-import { ProgressDisplay } from "./ProgressDisplay";
-import { useTestProgress } from "../hooks/useTypingProgress";
+import { useTypingEngine } from "./engine/useTypingEngine";
+import { useEngineText } from "./engine/useEngineText";
+import { ProgressDisplay } from "../typingControls/ProgressDisplay";
+import { useTestProgress } from "../typingControls/useTypingProgress";
 
 export default function TypingDisplay() {
   const { typingState } = useTypingContext();

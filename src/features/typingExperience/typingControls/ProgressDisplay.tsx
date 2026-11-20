@@ -3,7 +3,7 @@ import type {
   TestProgress,
   ProgressCount,
   ProgressUnit,
-} from "../hooks/useTypingProgress";
+} from "./useTypingProgress";
 import { DEFAULT_PROGRESS_APPEARANCE } from "../typingDefaults";
 
 import styles from "./typing-display.module.css";

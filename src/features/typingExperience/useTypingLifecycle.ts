@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { useTypingContext, type TypingSession } from "../context/TypingContext";
-import { useAppContext } from "../../../context/appContext";
+import { useTypingContext, type TypingSession } from "./context/TypingContext";
+import { useAppContext } from "../../app/appContext";
 
 interface Handler {
   retry: () => void;

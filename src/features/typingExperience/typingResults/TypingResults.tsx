@@ -1,10 +1,10 @@
 import { useState } from "react";
 import resultStyles from "./typing-results.module.css";
-import { useTypingSessionResults } from "../typingResults/useTypingResults";
+import { useTypingSessionResults } from "./useTypingResults";
 import clsx from "clsx";
-import { SpeedChart } from "../typingResults/speedGraph";
-import { AccuracyMinimap } from "../typingResults/accuracyMinimap";
-import { Replay } from "../typingResults/replay";
+import { SpeedChart } from "./visuals/speedGraph";
+import { AccuracyMinimap } from "./visuals/accuracyMinimap";
+import { Replay } from "./visuals/replay";
 
 interface TypingResultsProps {
   onRetry: () => void;

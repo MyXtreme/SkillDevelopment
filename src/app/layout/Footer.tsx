@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useAppContext } from "../../context/appContext";
+import { useAppContext } from "../appContext";
 
 function Footer() {
   const { app } = useAppContext();
