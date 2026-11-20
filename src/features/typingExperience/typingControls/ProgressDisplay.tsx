@@ -6,7 +6,7 @@ import type {
 } from "./useTypingProgress";
 import { DEFAULT_PROGRESS_APPEARANCE } from "../typingDefaults";
 
-import styles from "./typing-display.module.css";
+import styles from "./progress-display.module.css";
 
 export type VariantType = "number" | "bar";
 export type DirectionType = "grow" | "shrink";

@@ -2,7 +2,6 @@ import clsx from "clsx";
 
 import { useAppContext } from "../../app/appContext";
 import { TypingProvider } from "./context/TypingContext";
-import Controls from "./typingControls/Controls";
 import TypingDisplay from "./typingDisplay/TypingDisplay";
 import TypingResults from "./typingResults/TypingResults";
 import { useTypingLifecycle } from "./useTypingLifecycle";
@@ -18,7 +17,6 @@ function TypingView() {
   const immersive = app.layoutMode === "focused";
   return (
     <main className="section" id="main">
-      {!isFinished && <Controls />}
       {(isIdle || isRunning) && <TypingDisplay />}
       {isFinished && (
         <TypingResults onRetry={handler.retry} onNext={handler.continue} />

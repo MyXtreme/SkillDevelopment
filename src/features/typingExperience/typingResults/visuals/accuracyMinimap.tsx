@@ -1,6 +1,6 @@
 import type { CharState } from "../analyzer";
 import type { MistakeType } from "../../context/TypingContext";
-import minimapStyles from "../components/typing-results.module.css";
+import minimapStyles from "../typing-results.module.css";
 
 interface AccuracyMinimapProps {
   characterStates: CharState[];

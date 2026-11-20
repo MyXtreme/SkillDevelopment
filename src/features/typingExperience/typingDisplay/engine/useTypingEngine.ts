@@ -4,7 +4,7 @@ import { PERFORMANCE_THRESHOLDS } from "../../typingDefaults";
 import { createTypingSessionRecorder } from "./typingRecorderFactory";
 import { useAppContext } from "../../../../app/appContext";
 import useInputManager from "../../../../hooks/inputManager/useInputManager";
-import { createTypingPauseObserver } from "../typingObserverFactory";
+import { createTypingPauseObserver } from "./typingObserverFactory";
 
 const useSecondTicker = (
   active: boolean,
