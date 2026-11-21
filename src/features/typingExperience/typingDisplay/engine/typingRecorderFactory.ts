@@ -1,3 +1,4 @@
+import { computeRadarPoints } from "recharts/types/polar/Radar";
 import {
   type TimeLineSnapshot,
   type TypingSession,
@@ -226,9 +227,7 @@ export function createTypingSessionRecorder(
       timeStamp: Date.now(),
       elapsedTimeMs: Math.round(totalElapsedTimeMs),
       deltaTimeMs,
-      correctChars: summary.net.correctChars,
-      totalChars: summary.net.totalChars,
-      keyPresses: summary.gross.totalKeyPresses,
+      ...counters,
     };
     timeLine.push(timeLineSnapshot);
 
@@ -252,7 +251,7 @@ export function createTypingSessionRecorder(
     const action: KeyAction = key === "Backspace" ? "delete" : "insert";
 
     if (action === "delete") {
-      summary.gross.totalBackspaces++;
+      counters.backspaces++;
       keyEvent.push({
         timestamp: now,
         elapsedMs,
@@ -264,8 +263,8 @@ export function createTypingSessionRecorder(
 
       const wasCorrect = typedCorrectness.pop();
       if (wasCorrect !== undefined) {
-        wasCorrect ? summary.net.correctChars-- : summary.net.incorrectChars--;
-        summary.net.totalChars--;
+        counters.typedChars--;
+        if (wasCorrect) counters.correctChars--;
       }
       streakState = initialStreakState();
       return false;
@@ -279,8 +278,9 @@ export function createTypingSessionRecorder(
     streakState = nextState;
 
     const isCorrect = type === null;
-    summary.gross.totalKeyPresses++;
+    counters.typedChars++;
     if (!isCorrect) {
+      counters.errorChars++;
       mistakeEvent.push({
         elapsedMs,
         index: cursorIndex,
@@ -293,8 +293,8 @@ export function createTypingSessionRecorder(
     if (shouldBlock) return true;
 
     typedCorrectness.push(isCorrect);
-    isCorrect ? summary.net.correctChars++ : summary.net.incorrectChars++;
-    summary.net.totalChars++;
+    counters.textChars++;
+    if (isCorrect) counters.correctChars++;
 
     keyEvent.push({
       timestamp: now,

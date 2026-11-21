@@ -37,21 +37,18 @@ export interface Metrics {
 }
 
 export interface TypingCounters {
-  typedChars: number;
-  errorChars: number;
+  typedChars: number; // all keys pressed, mistakes included. gross
+  errorChars: number; // errors even if they corrected. gross
   backspaces: number;
-  otherKeys: number;
-  textChars: number;
-  correctChars: number;
+  otherKeys: number; // modifier or any other key
+  textChars: number; // on cursor index text. net
+  correctChars: number; // current correct. net
 }
 
-export interface TimeLineSnapshot {
+export interface TimeLineSnapshot extends TypingCounters {
   timeStamp: number;
   elapsedTimeMs: number;
   deltaTimeMs: number;
-  correctChars: number;
-  totalChars: number;
-  keyPresses: number;
 }
 export type MistakeType =
   | "incorrect"
