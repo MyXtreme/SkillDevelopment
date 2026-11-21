@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { CompletionType } from "../context/TypingContext";
 import { clamp, ratio } from "../../../shared/utils";
+import { findWordEnds, countWordsCompleted } from "../typingUtils/wordCounter";
 
 export type ProgressUnit = "seconds" | "words";
 
@@ -33,37 +34,6 @@ interface ProgressMeasure {
   fraction: number;
 }
 
-export function findWordEnds(text: string): number[] {
-  const ends: number[] = [];
-  let inWord = false;
-  for (let i = 0; i < text.length; i++) {
-    let char = text[i];
-    let isSpace =
-      char === " " || char === "\t" || char === "\n" || char === "\r";
-
-    if (!isSpace) {
-      inWord = true;
-    } else if (inWord) {
-      ends.push(i);
-      inWord = false;
-    }
-  }
-  if (inWord) {
-    ends.push(text.length);
-  }
-  return ends;
-}
-
-export function countAtMost(sorted: readonly number[], value: number) {
-  let low = 0;
-  let high = sorted.length;
-  while (low < high) {
-    const mid = Math.floor((low + high) / 2);
-    sorted[mid] <= value ? (low = mid + 1) : (high = mid);
-  }
-  return low;
-}
-
 const MEASURE_BY_COMPLETION: Record<
   CompletionType,
   (input: ProgressInput) => ProgressMeasure
@@ -76,7 +46,7 @@ const MEASURE_BY_COMPLETION: Record<
   }),
   textEnd: ({ typedLength, textLength, wordEnds }) => ({
     unit: "words",
-    current: countAtMost(wordEnds, typedLength),
+    current: countWordsCompleted(wordEnds, typedLength),
     total: wordEnds.length,
     fraction: ratio(typedLength, textLength),
   }),
