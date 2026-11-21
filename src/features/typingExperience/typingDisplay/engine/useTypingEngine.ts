@@ -137,10 +137,16 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
       } = latest.current;
 
       if (currentStatus === "finished") return;
-      if (ctrlKey || altKey || metaKey) return;
+      if (ctrlKey || altKey || metaKey) {
+        recorder.countOtherKey();
+        return;
+      }
 
       const isBackspace = key === "Backspace";
-      if (!isBackspace && [...key].length !== 1) return;
+      if (!isBackspace && [...key].length !== 1) {
+        recorder.countOtherKey();
+        return;
+      }
 
       if (
         currentConfig.completeOn === "timeEnd" &&
@@ -169,7 +175,7 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
         if (currentStatus === "idle") return;
         if (cursorIndex <= 0) return;
 
-        nextLength = nextLength - 1;
+        nextLength = cursorIndex - 1;
         setTypedText((prev) => prev.slice(0, -1));
       } else {
         e.preventDefault();
@@ -211,7 +217,7 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
 
   useInputManager({ onInputReceive: handleIncomingInput });
 
-  const synctTime = useCallback(
+  const syncTime = useCallback(
     (seconds: number) => {
       if (recorder.recording) {
         setTime(seconds);
@@ -220,7 +226,7 @@ export function useTypingEngine({ currentText, onBufferLow }: EngineProps) {
     [recorder],
   );
 
-  useSecondTicker(engineStatus === "running", recorder.getElapsedMs, synctTime);
+  useSecondTicker(engineStatus === "running", recorder.getElapsedMs, syncTime);
 
   useEffect(() => {
     if (engineStatus !== "running") return;

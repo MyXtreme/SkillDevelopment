@@ -35,6 +35,16 @@ export interface Metrics {
   accuracy: number;
   raw: number;
 }
+
+export interface TypingCounters {
+  typedChars: number;
+  errorChars: number;
+  backspaces: number;
+  otherKeys: number;
+  textChars: number;
+  correctChars: number;
+}
+
 export interface TimeLineSnapshot {
   timeStamp: number;
   elapsedTimeMs: number;

@@ -9,6 +9,7 @@ import {
   type KeyStroke,
   type TypingSessionSummary,
   type KeyAction,
+  type TypingCounters,
 } from "../../context/TypingContext";
 import {
   DEFAULT_TYPING_SESSION,
@@ -152,6 +153,15 @@ export function classifyKeystroke(
   };
 }
 
+const creatCounters = (): TypingCounters => ({
+  typedChars: 0,
+  errorChars: 0,
+  backspaces: 0,
+  otherKeys: 0,
+  textChars: 0,
+  correctChars: 0,
+});
+
 export function createTypingSessionRecorder(
   sessionConfig: TypingConfiguration | null,
 ) {
@@ -168,6 +178,7 @@ export function createTypingSessionRecorder(
 
   let streakState = initialStreakState();
   let summary = createSummary();
+  let counters = creatCounters();
 
   let sessionHeader: TypingSessionHeader = { ...DEFAULT_TYPING_SESSION.header };
   if (sessionConfig) sessionHeader.configuration = sessionConfig;
@@ -185,7 +196,7 @@ export function createTypingSessionRecorder(
     startWallTime = Date.now();
     recording = true;
     streakState = initialStreakState();
-    summary = createSummary();
+    counters = creatCounters();
 
     timeLine = [];
     mistakeEvent = [];
@@ -224,6 +235,9 @@ export function createTypingSessionRecorder(
     return timeLineSnapshot;
   };
 
+  const countOtherKey = () => {
+    if (recording) counters.otherKeys++;
+  };
   const capture = (
     key: string,
     expectedChar: string | null,
@@ -316,6 +330,19 @@ export function createTypingSessionRecorder(
       endTimestamp: endWallTime,
       reason,
     };
+
+    const summary: TypingSessionSummary = {
+      net: {
+        totalChars: counters.textChars,
+        correctChars: counters.correctChars,
+        incorrectChars: counters.textChars - counters.correctChars,
+      },
+      gross: {
+        totalKeyPresses: counters.typedChars,
+        totalBackspaces: counters.backspaces,
+      },
+    };
+
     session = {
       header: sessionHeader,
       body: {
@@ -341,6 +368,7 @@ export function createTypingSessionRecorder(
     start,
     getElapsedMs,
     tick,
+    countOtherKey,
     capture,
     stop,
   };
