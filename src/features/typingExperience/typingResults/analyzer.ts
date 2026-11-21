@@ -4,13 +4,8 @@ import type {
   MistakeType,
   TypingSession,
 } from "../context/TypingContext";
-import { PERFORMANCE_THRESHOLDS } from "../typingDefaults";
-
-export interface SpeedPoint {
-  t: number;
-  wpm: number;
-  raw: number;
-}
+import { analyzeSpeed } from "./speedAnalyzer";
+import type { SpeedMetricsConfig } from "./speedMetrics";
 
 export type CharStatus = "correct" | "incorrect" | "idleChar";
 export interface CharState {
@@ -27,31 +22,6 @@ export interface ReplayFrame {
   key: string;
   action: KeyAction;
   text: string;
-}
-
-export function analyzeSpeedSeries(session: TypingSession): SpeedPoint[] {
-  const { timeLine } = session.body;
-  const DIVISOR = PERFORMANCE_THRESHOLDS.CPM_TO_WPM_DIVISOR;
-  const MIN_GAP = PERFORMANCE_THRESHOLDS.MIN_POINT_GAP_S;
-  const points: SpeedPoint[] = [];
-
-  for (const tick of timeLine) {
-    if (tick.elapsedTimeMs <= 0) continue;
-    const minutes = tick.elapsedTimeMs / 60000;
-    const point: SpeedPoint = {
-      t: tick.elapsedTimeMs / 1000,
-      wpm: tick.correctChars / DIVISOR / minutes,
-      raw: tick.keyPresses / DIVISOR / minutes,
-    };
-
-    const last = points.at(-1);
-    if (last && point.t - last.t < MIN_GAP) {
-      points[points.length - 1] = point;
-    } else {
-      points.push(point);
-    }
-  }
-  return points;
 }
 
 //TODO: Real analyzing functions for character state and replay. Or corresponding chart function.
@@ -192,36 +162,42 @@ export const createEmptyMetrics = (): DerivedTypingMetrics => ({
   },
 });
 
+const METRICS_SPEED_CONFIG: SpeedMetricsConfig = {
+  visible: ["wpm", "rawWpm", "cpm", "burstWpm", "rollingWpm"],
+  rollingWindowSec: 1,
+  burstWindowSec: 3,
+};
+
 export function analyzeMetrics(session: TypingSession): DerivedTypingMetrics {
   const { header, body } = session;
   const { timeLine, mistakeEvent, pauseEvent, summary, text } = body;
 
-  const start = header.startTimestamp || 0;
-  const end = header.endTimestamp || 0;
   const durationMs =
-    end > start ? end - start : timeLine.at(-1)?.elapsedTimeMs || 1;
-  const durationMin = durationMs / 60000;
-  const DIVISOR = PERFORMANCE_THRESHOLDS.CPM_TO_WPM_DIVISOR;
+    header.reason === "timeEnd"
+      ? header.configuration.duration * 1000
+      : timeLine.at(-1)?.elapsedTimeMs || 1;
 
-  const cpm = summary.net.correctChars / durationMin;
-  const wpm = cpm / DIVISOR;
-  const rawWpm = summary.net.totalChars / DIVISOR / durationMin;
+  const { series, summary: speed } = analyzeSpeed(
+    session,
+    METRICS_SPEED_CONFIG,
+  );
+
+  const cpm = speed.cpm ?? 0;
+  const wpm = speed.wpm ?? 0;
+  const rawWpm = speed.rawWpm ?? 0;
+  const burst = speed.burstWpm ?? 0;
 
   let sumWpm = 0,
     sumWpmSq = 0,
-    peakWpm = 0,
-    burst = wpm;
-  for (const tick of timeLine) {
-    const tickMin = tick.deltaTimeMs / 60000;
-    const tickWpm = tickMin > 0 ? tick.correctChars / DIVISOR / tickMin : 0;
-    const tickBurst = tickMin > 0 ? tick.totalChars / DIVISOR / tickMin : 0;
-    sumWpm += tickWpm;
-    sumWpmSq += tickWpm * tickWpm;
-    if (tickWpm > peakWpm) peakWpm = tickWpm;
-    if (tickBurst > burst) burst = tickBurst;
+    peakWpm = 0;
+  for (const point of series) {
+    const momentary = point.rollingWpm ?? 0;
+    sumWpm += momentary;
+    sumWpmSq += momentary * momentary;
+    if (momentary > peakWpm) peakWpm = momentary;
   }
 
-  const n = timeLine.length;
+  const n = series.length;
   const avgWpm = n > 0 ? sumWpm / n : wpm;
   const variance = n > 1 ? Math.max(0, sumWpmSq / n - avgWpm * avgWpm) : 0;
   const consistencyScore =
