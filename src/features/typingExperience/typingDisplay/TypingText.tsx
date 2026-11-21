@@ -1,16 +1,15 @@
 import clsx from "clsx";
-import { useTypingContext } from "../context/TypingContext";
-import { useAutoScroll } from "../hooks/useAutoScroll";
-import { generateTextTokens } from "../typingUtils/textHighlighter";
-
-import typingDisplayStyles from "./typing-display.module.css";
 import { Fragment } from "react/jsx-runtime";
-import { useTypingEngine } from "../engine/useTypingEngine";
-import { useEngineText } from "../engine/useEngineText";
-import { ProgressDisplay } from "./ProgressDisplay";
-import { useTestProgress } from "../hooks/useTypingProgress";
+import { useTypingContext } from "../context/TypingContext";
+import { ProgressDisplay } from "../typingControls/ProgressDisplay";
+import { useTestProgress } from "../typingControls/useTypingProgress";
+import { generateTextTokens } from "../typingUtils/textHighlighter";
+import { useEngineText } from "./engine/useEngineText";
+import { useTypingEngine } from "./engine/useTypingEngine";
+import { useAutoScroll } from "./useAutoScroll";
+import styles from "./typing-text.module.css";
 
-export default function TypingDisplay() {
+export default function TypingText() {
   const { typingState } = useTypingContext();
   const { currentText, appendBuffer } = useEngineText();
   const { typedText, time } = useTypingEngine({
@@ -30,32 +29,31 @@ export default function TypingDisplay() {
 
   const isRunning = typingState.status === "running";
   return (
-    <div className={typingDisplayStyles.typingWrapper}>
+    <div className={styles.typingText}>
       <div
-        className={clsx(typingDisplayStyles.testProgress, {
+        className={clsx(styles.testProgress, {
           "fade-out": !isRunning,
         })}
       >
         <ProgressDisplay progress={progress} />
       </div>
-      <div className={typingDisplayStyles.typingArea}>
+      <div className={styles.typingArea}>
         <div
-          className={typingDisplayStyles.typingContent}
+          className={styles.typingContent}
           style={{ transform: `translateY(-${scrollOffset}px)` }}
         >
           {tokens.map((token, index) => (
             <Fragment key={`${token.char}-${index}`}>
               <span
                 ref={setSpanRef(index)}
-                className={clsx(typingDisplayStyles[token.classNameKey], {
-                  [typingDisplayStyles.caretAnchor]: token.isCaretBefore,
+                className={clsx(styles[token.classNameKey], {
+                  [styles.caretAnchor]: token.isCaretBefore,
                 })}
               >
                 {token.isCaretBefore && (
                   <span
-                    className={clsx(typingDisplayStyles.caretIndicator, {
-                      [typingDisplayStyles.caretAnimated]:
-                        typingState.config.caretAnimation,
+                    className={clsx(styles.caretIndicator, {
+                      [styles.caretAnimated]: typingState.config.caretAnimation,
                     })}
                     aria-hidden="true"
                   />

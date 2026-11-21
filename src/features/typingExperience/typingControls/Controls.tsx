@@ -1,11 +1,11 @@
 import clsx from "clsx";
 import { useState } from "react";
-import { useAppContext } from "../../../context/appContext";
+import { useAppContext } from "../../../app/appContext";
 import { type TypingConfiguration } from "../context/TypingContext";
 import { MEASURE_CONFIG_OPTIONS } from "../typingDefaults";
 
 import controlStyles from "./controls.module.css";
-import { useTypingConfig } from "../hooks/useTypingConfig";
+import { useTypingConfig } from "./useTypingConfig";
 
 function Controls() {
   const { app } = useAppContext();

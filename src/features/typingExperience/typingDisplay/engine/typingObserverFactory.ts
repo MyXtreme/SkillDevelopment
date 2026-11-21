@@ -1,4 +1,4 @@
-import { PERFORMANCE_THRESHOLDS } from "../typingDefaults";
+import { PERFORMANCE_THRESHOLDS } from "../../typingDefaults";
 
 export type PauseType = "pause" | "afk";
 

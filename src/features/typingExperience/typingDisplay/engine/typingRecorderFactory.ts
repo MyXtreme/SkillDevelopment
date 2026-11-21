@@ -9,11 +9,11 @@ import {
   type KeyStroke,
   type TypingSessionSummary,
   type KeyAction,
-} from "../context/TypingContext";
+} from "../../context/TypingContext";
 import {
   DEFAULT_TYPING_SESSION,
   PERFORMANCE_THRESHOLDS,
-} from "../typingDefaults";
+} from "../../typingDefaults";
 import type { PauseSegment } from "./typingObserverFactory";
 
 interface ProgressSnapshot {

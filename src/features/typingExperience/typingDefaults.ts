@@ -2,6 +2,7 @@ import {
   type TypingConfiguration,
   type TypingSession,
 } from "./context/TypingContext";
+import type { ProgressAppearance } from "./typingControls/ProgressDisplay";
 
 export const PERFORMANCE_THRESHOLDS = {
   REMAINING_BUFFER_THRESHOLD: 40,
@@ -60,4 +61,9 @@ export const DEFAULT_TYPING_SESSION: TypingSession = {
       },
     },
   },
+};
+
+export const DEFAULT_PROGRESS_APPEARANCE: ProgressAppearance = {
+  variant: "number",
+  direction: "shrink",
 };

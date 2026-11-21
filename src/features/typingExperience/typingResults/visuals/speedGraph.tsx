@@ -8,9 +8,9 @@ import {
   ReferenceLine,
   Tooltip,
 } from "recharts";
-import type { SpeedPoint } from "./analyzer";
+import type { SpeedPoint } from "../analyzer";
 import { useMemo, useState } from "react";
-import speedGraphStyles from "../components/typing-results.module.css";
+import speedGraphStyles from "../typing-results.module.css";
 import clsx from "clsx";
 
 interface SpeedChartProps {

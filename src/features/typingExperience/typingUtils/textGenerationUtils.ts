@@ -1,5 +1,8 @@
-import { COMMON_WORDS } from "../../../data/commonWordsEng";
-import { PUNCTUATION_STD_LIST, DIGITS_LIST } from "../../../data/nonText";
+import { COMMON_WORDS } from "../../../assets/collection/commonWordsEng";
+import {
+  PUNCTUATION_STD_LIST,
+  DIGITS_LIST,
+} from "../../../assets/collection/nonText";
 import { PERFORMANCE_THRESHOLDS } from "../typingDefaults";
 export function randomTexGeneration(
   withNum: boolean,

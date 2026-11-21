@@ -1,18 +1,19 @@
 import { useMemo } from "react";
 import type { CompletionType } from "../context/TypingContext";
-import { clamp } from "../../../shared/utils";
+import { clamp, ratio } from "../../../shared/utils";
 
 export type ProgressUnit = "seconds" | "words";
 
 export interface ProgressCount {
   unit: ProgressUnit;
-  passed: number;
+  current: number;
   total: number;
   remaining: number; // remaining = total - passed
 }
 
 export interface TestProgress {
   completeOn: CompletionType;
+  fraction: number;
   count: ProgressCount;
 }
 
@@ -21,14 +22,15 @@ interface ProgressInput {
   duration: number;
   elapsedSeconds: number;
   typedLength: number;
-  text: string;
+  textLength: number;
   wordEnds: readonly number[];
 }
 
 interface ProgressMeasure {
   unit: ProgressUnit;
-  passed: number;
+  current: number;
   total: number;
+  fraction: number;
 }
 
 export function findWordEnds(text: string): number[] {
@@ -68,13 +70,15 @@ const MEASURE_BY_COMPLETION: Record<
 > = {
   timeEnd: ({ duration, elapsedSeconds }) => ({
     unit: "seconds",
-    passed: elapsedSeconds,
+    current: elapsedSeconds,
     total: duration,
+    fraction: ratio(elapsedSeconds, duration),
   }),
-  textEnd: ({ typedLength, wordEnds }) => ({
+  textEnd: ({ typedLength, textLength, wordEnds }) => ({
     unit: "words",
-    passed: countAtMost(wordEnds, typedLength),
+    current: countAtMost(wordEnds, typedLength),
     total: wordEnds.length,
+    fraction: ratio(typedLength, textLength),
   }),
 };
 
@@ -100,25 +104,26 @@ export function useTestProgress({
     [completeOn, text],
   );
 
-  const { unit, passed, total } = MEASURE_BY_COMPLETION[completeOn]({
+  const { unit, current, total, fraction } = MEASURE_BY_COMPLETION[completeOn]({
     completeOn,
     duration,
     elapsedSeconds,
     typedLength,
-    text,
+    textLength: text.length,
     wordEnds,
   });
   return useMemo(() => {
     const safeTotal = Math.max(total, 0);
-    const safePassed = clamp(passed, 0, safeTotal);
+    const safeCurrent = clamp(current, 0, safeTotal);
     return {
       completeOn,
+      fraction,
       count: {
         unit,
         total: safeTotal,
-        passed: safePassed,
-        remaining: safeTotal - safePassed,
+        current: safeCurrent,
+        remaining: safeTotal - safeCurrent,
       },
     };
-  }, [completeOn, unit, passed, total]);
+  }, [completeOn, unit, current, total, fraction]);
 }

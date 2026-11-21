@@ -50,11 +50,17 @@ The architecture is intentionally modular and feature-oriented.
 ### Core principles
 
 - Feature-based architecture
-- Modular UI components
-- Modular CSS
+- Presentational components kept separate from domain logic
+- Component styles colocated with the components they style
+- Logic and hooks organized by the feature or behavior they implement
 - Context API for global state
-- Custom hooks for feature-specific logic
 - Clear separation of responsibilities over large monolithic components
+
+### Feature organization
+
+Organize the Typing experience around the responsibilities users and developers work with, not only by technical kind such as components, hooks, engine, or results. Keep each presentational component focused and place its CSS module beside it. Group hooks and non-UI logic into feature-specific areas according to the behavior they implement, so a change to one behavior can be followed without navigating unrelated technical folders.
+
+Shared components and utilities should live outside a feature only when they are genuinely reused. Avoid turning shared folders into catch-alls, and keep presentation, state coordination, and domain calculations independently understandable.
 
 ### State ownership
 
@@ -67,9 +73,7 @@ Application-wide state should live in shared context when it affects the whole a
 
 Typing-specific state should be owned by a dedicated typing context so that typing logic remains isolated from unrelated application concerns.
 
-The typing engine should be separated into reusable hooks and supporting logic instead of being embedded directly inside components.
-
-UI components should remain mostly presentational. Lifecycle, effects, and domain logic should live in hooks or dedicated modules.
+UI components should remain mostly presentational. Lifecycle and effects belong in hooks; domain calculations belong in focused logic modules. Keep these pieces grouped by the typing behavior they support rather than gathering all hooks or all logic into unrelated top-level buckets.
 
 ## Typing Product Direction
 
@@ -118,14 +122,15 @@ The current typing engine is structured to support a modern, extensible typing e
 - mistake recording
 - live WPM calculation
 - accuracy calculation
-- modular contexts
-- modular hooks
+- feature-specific state and behavior
 
 ### Metrics and event model
 
 Mistakes are stored as structured events rather than only being reduced to a final accuracy score. This allows the system to later support richer feedback, weakness analysis, and personalized recommendations.
 
 Timeline metrics are recorded over time and will become the foundation for visual graphs and progress analysis.
+
+Keep result presentation distinct from result analysis and calculations. Result views should be focused presentational components with their styles nearby, while replay, graphs, and analysis logic should be organized around the result behavior they provide.
 
 ## User Experience Philosophy
 

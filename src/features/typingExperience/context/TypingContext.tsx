@@ -9,7 +9,7 @@ import {
   DEFAULT_TYPING_CONFIG,
   DEFAULT_TYPING_SESSION,
 } from "../typingDefaults";
-import type { PauseSegment } from "../engine/typingObserverFactory";
+import type { PauseSegment } from "../typingDisplay/engine/typingObserverFactory";
 
 export type TypingActivity = "measure" | "practice" | "compete" | "explore";
 export type TypingStatus = "idle" | "running" | "finished";
